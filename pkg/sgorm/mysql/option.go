@@ -64,8 +64,9 @@ func WithLogging(l *zap.Logger, level ...logger.LogLevel) Option {
 		o.gLog = l
 		if len(level) > 0 {
 			o.logLevel = level[0]
+		} else {
+			o.logLevel = logger.Info
 		}
-		o.logLevel = logger.Info
 	}
 }
 
