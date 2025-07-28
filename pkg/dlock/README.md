@@ -32,7 +32,8 @@ func main() {
     if err != nil {
         panic(err)
     }
-    ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+    defer cancel()
 
     // case 1: try to acquire lock, unblock if failed
     {
@@ -100,7 +101,8 @@ func main() {
     if err != nil {
         panic(err)
     }
-    ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+    defer cancel()
 
     // case 1: try to acquire lock, unblock if failed
     {

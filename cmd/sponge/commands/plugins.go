@@ -151,7 +151,8 @@ func installPlugins(lackNames []string) {
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
-			ctx, _ := context.WithTimeout(context.Background(), time.Minute*3) //nolint
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+			defer cancel()
 			pkgAddr, ok := installPluginCommands[name]
 			if !ok {
 				return

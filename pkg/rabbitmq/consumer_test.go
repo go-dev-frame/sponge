@@ -94,7 +94,8 @@ func consume(ctx context.Context, queueName string, exchange *Exchange) error {
 }
 
 func TestConsumer_direct(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 	exchangeName := "direct-exchange-demo"
 	queueName := "direct-queue-1"
 	routeKey := "direct-key-1"
@@ -117,7 +118,8 @@ func TestConsumer_direct(t *testing.T) {
 }
 
 func TestConsumer_topic(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 	exchangeName := "topic-exchange-demo"
 	queueName := "topic-queue-1"
 	routingKey := "key1.key2.*"
@@ -140,7 +142,8 @@ func TestConsumer_topic(t *testing.T) {
 }
 
 func TestConsumer_fanout(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 	exchangeName := "fanout-exchange-demo"
 	queueName := "fanout-queue-1"
 	exchange := NewFanoutExchange(exchangeName)
@@ -162,7 +165,8 @@ func TestConsumer_fanout(t *testing.T) {
 }
 
 func TestConsumer_headers(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 	exchangeName := "headers-exchange-demo"
 	queueName := "headers-queue-1"
 	kv1 := map[string]interface{}{"hello1": "world1", "foo1": "bar1"}
@@ -185,7 +189,8 @@ func TestConsumer_headers(t *testing.T) {
 }
 
 func TestConsumer_delayedMessage(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*7)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*7)
+	defer cancel()
 	exchangeName := "delayed-message-exchange-demo"
 	queueName := "delayed-message-queue"
 	routingKey := "delayed-key"

@@ -21,7 +21,8 @@ func TestClient_Send(t *testing.T) {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	replyContent, err := client.Send(ctx, "Who are you?")
 	if err != nil {
 		t.Log(err)
@@ -43,7 +44,8 @@ func TestClient_SendStream(t *testing.T) {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	reply := client.SendStream(ctx, "Which model did you use to answer the question?")
 	for content := range reply.Content {
 		fmt.Printf(content)
@@ -61,7 +63,8 @@ func TestClient_ListModelNames(t *testing.T) {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	modelNames, err := client.ListModelNames(ctx)
 	if err != nil {
 		t.Log(err)
