@@ -85,7 +85,7 @@ func registerService(scheme string, host string, port int) (registry.Registry, *
     
     // deregister service
     ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+    defer cancel()
     if err := iRegistry.Deregister(ctx, serviceInstance); err != nil {
         return err
     }
