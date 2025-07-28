@@ -52,11 +52,11 @@ func TestNewRouter2(t *testing.T) {
 
 type mock struct{}
 
-func (u mock) Create(c *gin.Context)     { return }
-func (u mock) DeleteByID(c *gin.Context) { return }
-func (u mock) UpdateByID(c *gin.Context) { return }
-func (u mock) GetByID(c *gin.Context)    { return }
-func (u mock) List(c *gin.Context)       { return }
+func (u mock) Create(c *gin.Context)     {}
+func (u mock) DeleteByID(c *gin.Context) {}
+func (u mock) UpdateByID(c *gin.Context) {}
+func (u mock) GetByID(c *gin.Context)    {}
+func (u mock) List(c *gin.Context)       {}
 
 func Test_userExampleRouter(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
