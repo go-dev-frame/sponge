@@ -17,7 +17,7 @@ import (
 )
 
 func TestNewRouter_pbExample(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}

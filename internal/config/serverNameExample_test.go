@@ -11,7 +11,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	configFile := configs.Path("serverNameExample.yml")
+	configFile := configs.Location("serverNameExample.yml")
 	err := Init(configFile)
 	if gofile.IsExists(configFile) {
 		assert.NoError(t, err)
@@ -35,7 +35,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestInitNacos(t *testing.T) {
-	configFile := configs.Path("serverNameExample_cc.yml")
+	configFile := configs.Location("serverNameExample_cc.yml")
 	_, err := NewCenter(configFile)
 	if gofile.IsExists(configFile) {
 		assert.NoError(t, err)

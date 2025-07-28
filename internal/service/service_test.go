@@ -30,7 +30,7 @@ func TestRegisterAllService(t *testing.T) {
 // The default is to connect to the local grpc server, if you want to connect to a remote grpc server,
 // pass in the parameter grpcClient.
 func getRPCClientConnForTest(grpcClient ...config.GrpcClient) *grpc.ClientConn {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		panic(err)
 	}

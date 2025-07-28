@@ -19,7 +19,7 @@ import (
 )
 
 func TestGRPCServer(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func TestGRPCServer(t *testing.T) {
 }
 
 func TestGRPCServerMock(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func (g gRegistry) Deregister(ctx context.Context, service *registry.ServiceInst
 }
 
 func Test_grpcServer_setOptions(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}

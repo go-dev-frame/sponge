@@ -21,7 +21,3 @@ func Location(rel string) string {
 
 	return filepath.Join(basePath, rel)
 }
-
-func Path(rel string) string {
-	return Location(rel)
-}
