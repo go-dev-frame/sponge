@@ -50,7 +50,8 @@ type grpcServer struct {
 func (s *grpcServer) Start() error {
 	// registration Services
 	if s.iRegistry != nil {
-		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second) //nolint
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		if err := s.iRegistry.Register(ctx, s.instance); err != nil {
 			return err
 		}
@@ -99,7 +100,8 @@ func (s *grpcServer) Stop() error {
 	s.server.GracefulStop()
 
 	if s.httpServer != nil {
-		ctx, _ := context.WithTimeout(context.Background(), 3*time.Second) //nolint
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
 		if err := s.httpServer.Shutdown(ctx); err != nil {
 			return err
 		}
