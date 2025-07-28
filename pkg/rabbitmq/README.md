@@ -735,7 +735,8 @@ import (
 var url = "amqp://guest:guest@127.0.0.1:5672/"
 
 func main() {
-	ctx, _ := context.WithTimeout(context.Background(), time.Hour)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
 	exchangeName := "direct-exchange-demo"
 	queueName := "direct-queue"
 	routeKey := "info"

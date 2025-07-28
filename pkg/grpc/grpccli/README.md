@@ -15,7 +15,8 @@ func grpcClientExample() serverNameV1.UserExampleServiceClient {
 
 	var discovery registry.Discovery
 	var endpoint = fmt.Sprintf("127.0.0.1:%d", config.Get().Grpc.Port)
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 	if config.Get().App.EnableRegistryDiscovery {
 		endpoint = "discovery:///" + config.Get().App.Name
 		discovery = discoveryETCD(config.Get().Etcd.Addrs)

@@ -30,7 +30,8 @@ func NewEtcd(client *clientv3.Client, key string, ttl int) (Locker, error) {
 		ttl = defaultTTL
 	}
 	expiration := time.Duration(ttl) * time.Second
-	ctx, _ := context.WithTimeout(context.Background(), expiration) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), expiration)
+	defer cancel()
 
 	session, err := concurrency.NewSession(
 		client,

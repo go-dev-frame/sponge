@@ -73,7 +73,8 @@ func testLockAndUnlock(initLocker func() Locker, isBlock bool, t *testing.T) {
 		waitGroup.Add(1)
 		go func(i int) {
 			defer waitGroup.Done()
-			ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
 			NO := fmt.Sprintf("[NO-%d] ", i)
 
 			locker := initLocker()

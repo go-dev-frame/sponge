@@ -18,7 +18,8 @@ func UnaryClientTimeout(d time.Duration) grpc.UnaryClientInterceptor {
 	}
 
 	return func(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		ctx, _ = context.WithTimeout(ctx, d) //nolint
+		ctx, cancel := context.WithTimeout(ctx, d)
+		defer cancel()
 		return invoker(ctx, method, req, resp, cc, opts...)
 	}
 }
@@ -30,7 +31,8 @@ func StreamClientTimeout(d time.Duration) grpc.StreamClientInterceptor {
 	}
 
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
-		ctx, _ = context.WithTimeout(ctx, d) //nolint
+		ctx, cancel := context.WithTimeout(ctx, d)
+		defer cancel()
 		return streamer(ctx, desc, cc, method, opts...)
 	}
 }

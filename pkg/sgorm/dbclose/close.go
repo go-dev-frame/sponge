@@ -26,7 +26,8 @@ func Close(db *gorm.DB) error {
 }
 
 func checkInUse(sqlDB *sql.DB, duration time.Duration) {
-	ctx, _ := context.WithTimeout(context.Background(), duration) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), duration)
+	defer cancel()
 	for {
 		select {
 		case <-time.After(time.Millisecond * 250):

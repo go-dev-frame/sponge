@@ -210,7 +210,8 @@ func handleGenerateCode(c *gin.Context, outPath string, arg string) {
 	out = os.TempDir() + gofile.GetPathDelimiter() + "sponge-generate-code" + gofile.GetPathDelimiter() + out
 	args = append(args, fmt.Sprintf("--out=%s", out))
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute*2) // nolint
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
+	defer cancel()
 	result := gobash.Run(ctx, "sponge", args...)
 	resultInfo := ""
 	count := 0
@@ -260,7 +261,8 @@ func handleGenerateCode(c *gin.Context, outPath string, arg string) {
 	recordObj().set(c.ClientIP(), outPath, params)
 
 	go func() {
-		ctx, _ := context.WithTimeout(context.Background(), time.Minute*10)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
+		defer cancel()
 
 		for {
 			select {
@@ -306,7 +308,8 @@ func HandleAssistant(c *gin.Context) {
 	args := strings.Split(form.Arg, " ")
 	params := parseCommandArgs(args)
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute*30) // nolint
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*30) // nolint
+	defer cancel()
 	result := gobash.Run(ctx, "sponge", args...)
 	resultInfo := ""
 	count := 0

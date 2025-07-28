@@ -50,7 +50,8 @@ func Init(dsn string, opts ...Option) (*redis.Client, error) {
 		}
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
 	err = rdb.Ping(ctx).Err()
 
 	return rdb, err
@@ -85,7 +86,8 @@ func InitSingle(addr string, password string, db int, opts ...Option) (*redis.Cl
 		}
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
 	err := rdb.Ping(ctx).Err()
 
 	return rdb, err
@@ -121,7 +123,8 @@ func InitSentinel(masterName string, addrs []string, username string, password s
 		}
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
 	err := rdb.Ping(ctx).Err()
 
 	return rdb, err
@@ -156,7 +159,8 @@ func InitCluster(addrs []string, username string, password string, opts ...Optio
 		}
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
 	err := clusterRdb.ForEachMaster(ctx, func(ctx context.Context, client *redis.Client) error {
 		return client.Ping(ctx).Err()
 	})

@@ -30,7 +30,8 @@ func Close(servers []app.IServer) []app.Close {
 	// close tracing
 	if config.Get().App.EnableTrace {
 		closes = append(closes, func() error {
-			ctx, _ := context.WithTimeout(context.Background(), 2*time.Second) //nolint
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
 			return tracer.Close(ctx)
 		})
 	}

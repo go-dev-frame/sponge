@@ -98,7 +98,8 @@ func Timeout(d time.Duration) gin.HandlerFunc {
 		return func(c *gin.Context) {}
 	}
 	return func(c *gin.Context) {
-		ctx, _ := context.WithTimeout(c.Request.Context(), d) //nolint
+		ctx, cancel := context.WithTimeout(c.Request.Context(), d)
+		defer cancel()
 		c.Request = c.Request.WithContext(ctx)
 
 		c.Next()
