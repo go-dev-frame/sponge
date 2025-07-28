@@ -19,7 +19,7 @@ import (
 
 // need real database to test
 func TestHTTPServer(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func TestHTTPServer(t *testing.T) {
 }
 
 func TestHTTPServerMock(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}

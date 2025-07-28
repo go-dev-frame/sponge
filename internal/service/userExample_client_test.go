@@ -126,19 +126,19 @@ func Test_service_userExample_methods(t *testing.T) {
 // Perform a stress test on {{.LowerName}}'s method and
 // copy the press test report to your browser when you are finished.
 func Test_service_userExample_benchmark(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		panic(err)
 	}
 
 	grpcClientCfg := getGRPCClientCfg()
 	host := fmt.Sprintf("%s:%d", grpcClientCfg.Host, grpcClientCfg.Port)
-	protoFile := configs.Path("../api/serverNameExample/v1/userExample.proto")
+	protoFile := configs.Location("../api/serverNameExample/v1/userExample.proto")
 	// If third-party dependencies are missing during the press test,
 	// copy them to the project's third_party directory.
 	dependentProtoFilePath := []string{
-		configs.Path("../third_party"), // third_party directory
-		configs.Path(".."),             // Previous level of third_party
+		configs.Location("../third_party"), // third_party directory
+		configs.Location(".."),             // Previous level of third_party
 	}
 
 	tests := []struct {
