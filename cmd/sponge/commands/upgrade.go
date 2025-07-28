@@ -250,7 +250,7 @@ func updateSpongeInternalPlugin(targetVersion string) error {
 
 	// v1.x.x version does not support protoc-gen-json-field
 	if !strings.HasPrefix(targetVersion, "v1") {
-		ctx, cancel = context.WithTimeout(context.Background(), time.Minute) //nolint
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute) //nolint
 		defer cancel()
 		genJSONVersion := "github.com/go-dev-frame/sponge/cmd/protoc-gen-json-field@" + targetVersion
 		if compareVersion(separatedVersion, targetVersion) {
