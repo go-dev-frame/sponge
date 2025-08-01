@@ -118,7 +118,8 @@ func (h *Handler) Close() {
 		h.MockDao.Close()
 	}
 	if h.HTTPServer != nil {
-		ctx, _ := context.WithTimeout(context.Background(), 3*time.Second) //nolint
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
 		_ = h.HTTPServer.Shutdown(ctx)
 	}
 }

@@ -77,13 +77,15 @@ func registerService(scheme string, host string, port int) (registry.Registry, *
     iRegistry, serviceInstance := registerService("http", "127.0.0.1", 8080)
     
     // register service
-    ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
     if err := iRegistry.Register(ctx, serviceInstance); err != nil {
         panic(err)
     }
     
     // deregister service
-    ctx, _ = context.WithTimeout(context.Background(), 3*time.Second)
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
     if err := iRegistry.Deregister(ctx, serviceInstance); err != nil {
         return err
     }

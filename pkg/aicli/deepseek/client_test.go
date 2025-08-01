@@ -21,7 +21,8 @@ func TestClient_Send(t *testing.T) {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	mdContent, err := client.Send(ctx, "你是谁？")
 	if err != nil {
 		t.Log(err)
@@ -43,7 +44,8 @@ func TestClient_SendStream(t *testing.T) {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	answer := client.SendStream(ctx, genericRoleDescZH)
 	for content := range answer.Content {
 		fmt.Printf(content)
@@ -61,7 +63,8 @@ func TestClient_ListModelNames(t *testing.T) {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	modelNames, err := client.ListModelNames(ctx)
 	if err != nil {
 		t.Log(err)

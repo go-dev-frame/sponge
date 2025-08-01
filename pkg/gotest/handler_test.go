@@ -94,6 +94,7 @@ func TestHandler_GoRunHttpServer(t *testing.T) {
 	t.Log(url)
 
 	time.Sleep(time.Millisecond * 100)
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	_ = h.HTTPServer.Shutdown(ctx)
 }

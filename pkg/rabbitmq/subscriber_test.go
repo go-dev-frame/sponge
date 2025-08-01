@@ -11,7 +11,8 @@ import (
 )
 
 func TestSubscriber(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 
 	err := runPublisher(ctx, testChannelName)
 	if err != nil {

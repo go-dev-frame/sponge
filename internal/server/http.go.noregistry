@@ -30,7 +30,8 @@ func (s *httpServer) Start() error {
 
 // Stop http service
 func (s *httpServer) Stop() error {
-	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 	return s.server.Shutdown(ctx)
 }
 

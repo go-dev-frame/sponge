@@ -88,7 +88,8 @@ func runUpgrade(targetVersion string) (string, error) {
 }
 
 func runUpgradeCommand(targetVersion string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute*3) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+	defer cancel()
 	spongeVersion := "github.com/go-dev-frame/sponge/cmd/sponge@" + targetVersion
 	if compareVersion(separatedVersion, targetVersion) {
 		spongeVersion = strings.ReplaceAll(spongeVersion, "go-dev-frame", "zhufuyi")
@@ -171,7 +172,8 @@ func copyToTempDir(targetVersion string) (string, error) {
 }
 
 func executeCommand(name string, args ...string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*30) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
 	result := gobash.Run(ctx, name, args...)
 	for v := range result.StdOut {
 		_ = v
@@ -218,7 +220,8 @@ func getLatestVersion(s string) string {
 }
 
 func updateSpongeInternalPlugin(targetVersion string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 	genGinVersion := "github.com/go-dev-frame/sponge/cmd/protoc-gen-go-gin@" + targetVersion
 	if compareVersion(separatedVersion, targetVersion) {
 		genGinVersion = strings.ReplaceAll(genGinVersion, "go-dev-frame", "zhufuyi")
@@ -231,7 +234,8 @@ func updateSpongeInternalPlugin(targetVersion string) error {
 		return result.Err
 	}
 
-	ctx, _ = context.WithTimeout(context.Background(), time.Minute) //nolint
+	ctx, cancel = context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 	genRPCVersion := "github.com/go-dev-frame/sponge/cmd/protoc-gen-go-rpc-tmpl@" + targetVersion
 	if compareVersion(separatedVersion, targetVersion) {
 		genRPCVersion = strings.ReplaceAll(genRPCVersion, "go-dev-frame", "zhufuyi")
@@ -246,7 +250,8 @@ func updateSpongeInternalPlugin(targetVersion string) error {
 
 	// v1.x.x version does not support protoc-gen-json-field
 	if !strings.HasPrefix(targetVersion, "v1") {
-		ctx, _ = context.WithTimeout(context.Background(), time.Minute) //nolint
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute) //nolint
+		defer cancel()
 		genJSONVersion := "github.com/go-dev-frame/sponge/cmd/protoc-gen-json-field@" + targetVersion
 		if compareVersion(separatedVersion, targetVersion) {
 			genJSONVersion = strings.ReplaceAll(genJSONVersion, "go-dev-frame", "zhufuyi")

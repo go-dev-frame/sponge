@@ -15,7 +15,7 @@ import (
 )
 
 func TestGetDB(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func TestGetDB(t *testing.T) {
 }
 
 func TestInitMysqlError(t *testing.T) {
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func TestInitMysqlError(t *testing.T) {
 }
 
 func TestInitPostgresqlError(t *testing.T) {
-	_ = config.Init(configs.Path("serverNameExample.yml"))
+	_ = config.Init(configs.Location("serverNameExample.yml"))
 
 	// change config error test
 	config.Get().Database.Postgresql.Dsn = "root:123456@(127.0.0.1:5432)/test"
@@ -66,7 +66,7 @@ func TestInitPostgresqlError(t *testing.T) {
 }
 
 func TestInitSqliteError(t *testing.T) {
-	_ = config.Init(configs.Path("serverNameExample.yml"))
+	_ = config.Init(configs.Location("serverNameExample.yml"))
 	utils.SafeRunWithTimeout(time.Second*2, func(cancel context.CancelFunc) {
 		InitSqlite()
 		assert.NotNil(t, gdb)
@@ -88,7 +88,7 @@ func TestInitRedis(t *testing.T) {
 		}
 	}()
 
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		panic(err)
 	}
@@ -113,7 +113,7 @@ func TestGetCacheType(t *testing.T) {
 	ct := GetCacheType()
 	assert.NotNil(t, ct)
 
-	err := config.Init(configs.Path("serverNameExample.yml"))
+	err := config.Init(configs.Location("serverNameExample.yml"))
 	if err != nil {
 		panic(err)
 	}

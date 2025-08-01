@@ -13,7 +13,8 @@ Run executes commands and can actively end them, returning logs and error messag
 ```go
 
     arg := "for i in $(seq 1 5); do echo 'test cmd' $i;sleep 1; done"
-    ctx, _ := context.WithTimeout(context.Background(), 3*time.Second) // timeout control
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) // timeout control
+    defer cancel()
 
     result := Run(ctx, "bash", "-c", arg)
     // real-time output of logs and error messages

@@ -11,10 +11,10 @@ import "github.com/go-dev-frame/sponge/pkg/app"
 
 func main() {
     initApp()
-    servers := registerServers()
-    closes := registerCloses(servers)
+    services := CreateServices()
+    closes := Close(services)
 
-    a := app.New(servers, closes)
+    a := app.New(services, closes)
     a.Run()
 }
 
@@ -28,38 +28,39 @@ func initApp() {
     // ......
 }
 
-func registerServers() []app.IServer {
+func CreateServices() []app.IServer {
     var servers []app.IServer
 
-    // create a http service
-    servers = append(servers, server.NewHTTPServer(
+    // create an HTTP service
+    httpAddr := ":8080" // or get from configuration
+    httpServer := server.NewHTTPServer(
+        httpAddr,
+        server.WithHTTPIsProd(true), // run in release mode
+    )
+    servers = append(servers, httpServer)
 
-    ))
-
-    // create a grpc service
-    servers = append(servers, server.NewGRPCServer(
-
-    ))
-
-    // ......
+    // create a gRPC service (optional)
+    // grpcServer := server.NewGRPCServer(
+    //
+    // )
+    // servers = append(servers, grpcServer)
 
     return servers
 }
 
-func registerCloses(servers []app.IServer) []app.Close {
+func Close(servers []app.IServer) []app.Close {
     var closes []app.Close
 
-    // close server
-    for _, server := range servers {
-        closes = append(closes, server.Stop)
+    // close servers
+    for _, s := range servers {
+        closes = append(closes, s.Stop)
     }
 
-    // close other resource
+    // close other resources (database, logger, tracing, etc.)
     closes = append(closes, func() error {
-
+        // TODO: call db.Close()
+        return nil
     })
-
-    // ......
 
     return closes
 }

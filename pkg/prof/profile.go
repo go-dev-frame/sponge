@@ -154,7 +154,8 @@ func (p *profile) checkTimeout() {
 		return
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(durationSecond)) //nolint
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(durationSecond))
+	defer cancel()
 	select {
 	case <-p.stopCh:
 		fmt.Println("[profile] stop collecting profiles: manual")

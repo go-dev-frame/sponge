@@ -77,7 +77,8 @@ func TestApp(t *testing.T) {
 	time.Sleep(time.Second)
 
 	// test watch
-	ctx, _ := context.WithTimeout(context.Background(), time.Millisecond*100)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
+	defer cancel()
 	assert.Error(t, a.watch(ctx))
 
 	time.Sleep(time.Second)

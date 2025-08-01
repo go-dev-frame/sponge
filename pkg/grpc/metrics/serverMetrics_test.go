@@ -78,7 +78,8 @@ func TestRegister(t *testing.T) {
 func TestServerHTTPService(t *testing.T) {
 	serverAddr, _ := utils.GetLocalHTTPAddrPairs()
 	s := ServerHTTPService(serverAddr, grpc.NewServer())
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	time.Sleep(time.Millisecond * 100)
 	err := s.Shutdown(ctx)
 	assert.NoError(t, err)
