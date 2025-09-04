@@ -147,8 +147,7 @@ func NewTimeBar(totalDuration time.Duration) *TimeBar {
 // Start begins automatic updates in a background goroutine.
 func (b *TimeBar) Start() {
 	b.startTime = time.Now()
-	b.wg.Add(1)
-	go b.run()
+	b.wg.Go(func() { b.run() })
 }
 
 // stopped is an internal helper to handle shutting down the progress bar.
@@ -178,8 +177,6 @@ func (b *TimeBar) Stop() {
 
 // run periodically refreshes the bar in the background.
 func (b *TimeBar) run() {
-	defer b.wg.Done()
-
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 

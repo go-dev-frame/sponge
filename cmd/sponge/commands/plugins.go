@@ -148,10 +148,9 @@ func installPlugins(lackNames []string) {
 			continue
 		}
 
-		wg.Add(1)
-		go func(name string) {
-			defer wg.Done()
-			ctx, _ := context.WithTimeout(context.Background(), time.Minute*3) //nolint
+		wg.Go(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+			defer cancel()
 			pkgAddr, ok := installPluginCommands[name]
 			if !ok {
 				return
@@ -166,7 +165,7 @@ func installPlugins(lackNames []string) {
 			} else {
 				fmt.Printf("%s %s\n", installedSymbol, name)
 			}
-		}(name)
+		})
 	}
 
 	wg.Wait()

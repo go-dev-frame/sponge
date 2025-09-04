@@ -62,14 +62,12 @@ func NewWorkerPool(ctx context.Context, workerSize int, jobQueueSize int) (*Work
 // Start starts the worker pool
 func (wp *WorkerPool) Start() {
 	for i := 0; i < wp.workerCount; i++ {
-		wp.wg.Add(1)
-		go wp.worker()
+		wp.wg.Go(func() { wp.worker() })
 	}
 }
 
 // worker is the goroutine that actually executes tasks
 func (wp *WorkerPool) worker() {
-	defer wp.wg.Done()
 	for {
 		select {
 		case job, ok := <-wp.jobQueue:
