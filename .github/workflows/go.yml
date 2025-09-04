@@ -24,7 +24,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.6
+          go-version: 1.25.1
 
       - name: Lint Go Code
         run: |
@@ -45,7 +45,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.6
+          go-version: 1.25.1
 
       - name: Run Unit tests
         run: make test
@@ -73,7 +73,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.6
+          go-version: 1.25.1
 
       - name: Build
         run: make build && make build-sponge
