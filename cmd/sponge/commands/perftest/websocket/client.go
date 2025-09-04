@@ -61,8 +61,7 @@ func (c *Client) Dial(ctx context.Context) error {
 }
 
 // Run starts the client worker.
-func (c *Client) Run(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (c *Client) Run(ctx context.Context) {
 
 	err := c.Dial(ctx)
 	if err != nil {

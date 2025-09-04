@@ -125,14 +125,12 @@ func (p *PerfTestHTTP) RunWithFixedRequestsNum(globalCtx context.Context) (*Stat
 	}
 
 	for i := 0; i < p.Worker; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for range jobs {
 				requestOnce(p.Client, p.Params, resultCh)
 				bar.Increment()
 			}
-		}()
+		})
 	}
 
 	start = time.Now()
@@ -214,19 +212,17 @@ func (p *PerfTestHTTP) RunWithFixedDuration(globalCtx context.Context) (*Statist
 
 	// Start workers
 	for i := 0; i < p.Worker; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			// Keep sending requests until the context is canceled
 			for {
 				select {
 				case <-ctx.Done():
-					return // Exit goroutine when context is canceled
+					return
 				default:
 					requestOnce(p.Client, p.Params, resultCh)
 				}
 			}
-		}()
+		})
 	}
 
 	start = time.Now()
