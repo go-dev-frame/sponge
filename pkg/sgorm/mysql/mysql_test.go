@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -13,7 +12,7 @@ func TestInitMysql(t *testing.T) {
 	db, err := Init(dsn, WithEnableTrace())
 	if err != nil {
 		// ignore test error about not being able to connect to real mysql
-		t.Logf(fmt.Sprintf("connect to mysql failed, err=%v, dsn=%s", err, dsn))
+		t.Logf("connect to mysql failed, err=%v, dsn=%s", err, dsn)
 		return
 	}
 	defer Close(db)
@@ -26,7 +25,7 @@ func TestInitTidb(t *testing.T) {
 	db, err := InitTidb(dsn)
 	if err != nil {
 		// ignore test error about not being able to connect to real tidb
-		t.Logf(fmt.Sprintf("connect to mysql failed, err=%v, dsn=%s", err, dsn))
+		t.Logf("connect to mysql failed, err=%v, dsn=%s", err, dsn)
 		return
 	}
 	defer Close(db)

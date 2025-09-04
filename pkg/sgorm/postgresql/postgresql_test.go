@@ -1,7 +1,6 @@
 package postgresql
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -13,7 +12,7 @@ func TestInit(t *testing.T) {
 	db, err := Init(dsn, WithEnableTrace())
 	if err != nil {
 		// ignore test error about not being able to connect to real postgresql
-		t.Logf(fmt.Sprintf("connect to postgresql failed, err=%v, dsn=%s", err, dsn))
+		t.Logf("connect to postgresql failed, err=%v, dsn=%s", err, dsn)
 		return
 	}
 	defer Close(db)
