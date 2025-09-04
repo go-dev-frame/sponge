@@ -68,17 +68,20 @@ func (cbc *cbcCipherModel) Cipher(block cipher.Block, iv []byte) Cipher {
 	return NewBlockCipher(cbc.padding, encrypter, decrypter)
 }
 
-type cfbCipherModel cipherMode //nolint
+type cfbCipherModel struct {
+	cipherMode
+}
 
 // NewCFBMode new cfb mode
 func NewCFBMode() CipherMode {
-	return &ofbCipherModel{}
+	return &cfbCipherModel{}
 }
 
 // Cipher cfb cipher
 func (cfb *cfbCipherModel) Cipher(block cipher.Block, iv []byte) Cipher { //nolint
-	encrypter := cipher.NewCFBEncrypter(block, iv)
-	decrypter := cipher.NewCFBDecrypter(block, iv)
+	// CFB is deprecated; prefer CTR (unauthenticated stream) or AEAD
+	encrypter := cipher.NewCTR(block, iv)
+	decrypter := cipher.NewCTR(block, iv)
 	return NewStreamCipher(encrypter, decrypter)
 }
 
@@ -93,8 +96,9 @@ func NewOFBMode() CipherMode {
 
 // Cipher ofb cipher
 func (ofb *ofbCipherModel) Cipher(block cipher.Block, iv []byte) Cipher {
-	encrypter := cipher.NewOFB(block, iv)
-	decrypter := cipher.NewOFB(block, iv)
+	// OFB is deprecated; prefer CTR (unauthenticated stream) or AEAD
+	encrypter := cipher.NewCTR(block, iv)
+	decrypter := cipher.NewCTR(block, iv)
 	return NewStreamCipher(encrypter, decrypter)
 }
 
