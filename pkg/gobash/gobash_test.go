@@ -25,7 +25,7 @@ func TestRun(t *testing.T) {
 				t.Logf("pid: %d", pid)
 				continue
 			}
-			t.Logf(v)
+			t.Log(v)
 		}
 		if result.Err != nil {
 			t.Logf("execute command failed, %v", result.Err)

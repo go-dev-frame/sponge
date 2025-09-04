@@ -41,7 +41,7 @@ func TestClient_SendStream(t *testing.T) {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	reply := client.SendStream(ctx, "Which model did you use to answer the question?")
 	for content := range reply.Content {
-		fmt.Printf(content)
+		fmt.Print(content)
 	}
 	if reply.Err != nil {
 		t.Log(reply.Err)

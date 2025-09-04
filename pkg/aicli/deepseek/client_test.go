@@ -46,7 +46,7 @@ func TestClient_SendStream(t *testing.T) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	answer := client.SendStream(ctx, genericRoleDescZH)
 	for content := range answer.Content {
-		fmt.Printf(content)
+		fmt.Print(content)
 	}
 	if answer.Err != nil {
 		t.Log(answer.Err)

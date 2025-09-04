@@ -27,10 +27,10 @@ func Test_hideSensitiveFields(t *testing.T) {
 	keywords = append(keywords, `"dsn"`, `"password"`, `"name"`)
 	str := Show(c, keywords...)
 
-	fmt.Printf(hideSensitiveFields(str))
+	fmt.Print(hideSensitiveFields(str))
 
 	str = "\ndefault:123456@192.168.3.37:6379/0\n"
-	fmt.Printf(hideSensitiveFields(str))
+	fmt.Print(hideSensitiveFields(str))
 }
 
 // test listening for configuration file updates
