@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -13,7 +12,7 @@ func TestInit(t *testing.T) {
 	db, err := Init(dbFile)
 	if err != nil {
 		// ignore test error about not being able to connect to real sqlite
-		t.Logf(fmt.Sprintf("connect to sqlite failed, err=%v, dbFile=%s", err, dbFile))
+		t.Logf("connect to sqlite failed, err=%v, dbFile=%s", err, dbFile)
 		return
 	}
 	defer Close(db)

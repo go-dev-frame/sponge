@@ -18,7 +18,7 @@ func TestRun(t *testing.T) {
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		result := Run(ctx, cmd, args...)
 		for v := range result.StdOut { // Real-time output of logs and error messages
-			t.Logf(v)
+			t.Log(v)
 		}
 		if result.Err != nil {
 			t.Logf("execute command failed, %v", result.Err)
