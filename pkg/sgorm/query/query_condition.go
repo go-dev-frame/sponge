@@ -134,99 +134,128 @@ type Column struct {
 // converting ExpType to sql expressions and LogicType to sql using characters
 func (c *Column) checkExp() (string, error) {
 	symbol := "?"
+
+	if err := c.normalizeExp(); err != nil {
+		return symbol, err
+	}
+
+	switch c.Exp {
+	case " LIKE ":
+		if err := c.applyLike(); err != nil {
+			return symbol, err
+		}
+	case " IN ", " NOT IN ":
+		if err := c.applyIn(); err != nil {
+			return symbol, err
+		}
+		symbol = "(?)"
+	case " IS NULL ", " IS NOT NULL ":
+		c.Value = nil
+		symbol = ""
+	}
+
+	if err := c.normalizeLogic(); err != nil {
+		return symbol, err
+	}
+
+	return symbol, nil
+}
+
+func (c *Column) normalizeExp() error {
 	if c.Exp == "" {
 		c.Exp = Eq
 	}
 	if v, ok := expMap[strings.ToLower(c.Exp)]; ok { //nolint
 		c.Exp = v
-		switch c.Exp {
-		case " LIKE ":
-			val, ok1 := c.Value.(string)
-			if !ok1 {
-				return symbol, fmt.Errorf("invalid value type '%s'", c.Value)
-			}
-			// Preserve user-provided leading/trailing wildcards and escape only the inner content.
-			hasPrefixPercent := strings.HasPrefix(val, "%")
-			hasPrefixUnderscore := strings.HasPrefix(val, "_")
-			hasSuffixPercent := strings.HasSuffix(val, "%")
-			hasSuffixUnderscore := strings.HasSuffix(val, "_")
-
-			inner := val
-			if hasPrefixPercent || hasPrefixUnderscore {
-				inner = inner[1:]
-			}
-			if hasSuffixPercent || hasSuffixUnderscore {
-				if len(inner) > 0 {
-					inner = inner[:len(inner)-1]
-				}
-			}
-
-			// Escape inner occurrences of % and _
-			inner = strings.ReplaceAll(inner, "%", "\\%")
-			inner = strings.ReplaceAll(inner, "_", "\\_")
-
-			// Rebuild the value with original wildcards; if none were given, wrap with %...%
-			switch {
-			case hasPrefixPercent:
-				inner = "%" + inner
-			case hasPrefixUnderscore:
-				inner = "_" + inner
-			}
-			switch {
-			case hasSuffixPercent:
-				inner = inner + "%"
-			case hasSuffixUnderscore:
-				inner = inner + "_"
-			}
-
-			if !(hasPrefixPercent || hasPrefixUnderscore || hasSuffixPercent || hasSuffixUnderscore) {
-				inner = "%" + inner + "%"
-			}
-			c.Value = inner
-		case " IN ", " NOT IN ":
-			val, ok1 := c.Value.(string)
-			if ok1 {
-				values := []interface{}{}
-				ss := strings.Split(val, ",")
-				for _, s := range ss {
-					s = strings.TrimSpace(s)
-					if strings.HasPrefix(s, "\"") {
-						values = append(values, strings.Trim(s, "\""))
-						continue
-					} else if strings.HasPrefix(s, "'") {
-						values = append(values, strings.Trim(s, "'"))
-						continue
-					}
-					value, err := strconv.Atoi(s)
-					if err == nil {
-						values = append(values, value)
-					} else {
-						values = append(values, s)
-					}
-				}
-				c.Value = values
-			}
-			symbol = "(?)"
-		case " IS NULL ", " IS NOT NULL ":
-			c.Value = nil
-			symbol = ""
-		}
-	} else {
-		return symbol, fmt.Errorf("unsported exp type '%s'", c.Exp)
+		return nil
 	}
+	return fmt.Errorf("unsported exp type '%s'", c.Exp)
+}
 
+func (c *Column) normalizeLogic() error {
 	if c.Logic == "" {
 		c.Logic = AND
-	} else {
-		logic := strings.ToLower(c.Logic)
-		if _, ok := logicMap[logic]; ok { //nolint
-			c.Logic = logic
-		} else {
-			return symbol, fmt.Errorf("unsported logic type '%s'", c.Logic)
+		return nil
+	}
+	logic := strings.ToLower(c.Logic)
+	if _, ok := logicMap[logic]; ok { //nolint
+		c.Logic = logic
+		return nil
+	}
+	return fmt.Errorf("unsported logic type '%s'", c.Logic)
+}
+
+func (c *Column) applyLike() error {
+	val, ok1 := c.Value.(string)
+	if !ok1 {
+		return fmt.Errorf("invalid value type '%s'", c.Value)
+	}
+	// Preserve user-provided leading/trailing wildcards and escape only the inner content.
+	hasPrefixPercent := strings.HasPrefix(val, "%")
+	hasPrefixUnderscore := strings.HasPrefix(val, "_")
+	hasSuffixPercent := strings.HasSuffix(val, "%")
+	hasSuffixUnderscore := strings.HasSuffix(val, "_")
+
+	inner := val
+	if hasPrefixPercent || hasPrefixUnderscore {
+		inner = inner[1:]
+	}
+	if hasSuffixPercent || hasSuffixUnderscore {
+		if len(inner) > 0 {
+			inner = inner[:len(inner)-1]
 		}
 	}
 
-	return symbol, nil
+	// Escape inner occurrences of % and _
+	inner = strings.ReplaceAll(inner, "%", "\\%")
+	inner = strings.ReplaceAll(inner, "_", "\\_")
+
+	// Rebuild the value with original wildcards; if none were given, wrap with %...%
+	switch {
+	case hasPrefixPercent:
+		inner = "%" + inner
+	case hasPrefixUnderscore:
+		inner = "_" + inner
+	}
+	switch {
+	case hasSuffixPercent:
+		inner = inner + "%"
+	case hasSuffixUnderscore:
+		inner = inner + "_"
+	}
+
+	if !(hasPrefixPercent || hasPrefixUnderscore || hasSuffixPercent || hasSuffixUnderscore) {
+		inner = "%" + inner + "%"
+	}
+	c.Value = inner
+	return nil
+}
+
+func (c *Column) applyIn() error {
+	val, ok1 := c.Value.(string)
+	if !ok1 {
+		return nil
+	}
+	values := []interface{}{}
+	ss := strings.Split(val, ",")
+	for _, s := range ss {
+		s = strings.TrimSpace(s)
+		if strings.HasPrefix(s, "\"") {
+			values = append(values, strings.Trim(s, "\""))
+			continue
+		} else if strings.HasPrefix(s, "'") {
+			values = append(values, strings.Trim(s, "'"))
+			continue
+		}
+		value, err := strconv.Atoi(s)
+		if err == nil {
+			values = append(values, value)
+		} else {
+			values = append(values, s)
+		}
+	}
+	c.Value = values
+	return nil
 }
 
 // ConvertToPage converted to page
