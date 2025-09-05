@@ -261,7 +261,7 @@ func (c *Column) convertValue() error {
 			}
 		}
 	} else {
-		return fmt.Errorf("unsported exp type '%s'", c.Exp)
+		return fmt.Errorf("unsupported exp type '%s'", c.Exp)
 	}
 	return nil
 }

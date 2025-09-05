@@ -169,7 +169,7 @@ func (c *Column) normalizeExp() error {
 		c.Exp = v
 		return nil
 	}
-	return fmt.Errorf("unsported exp type '%s'", c.Exp)
+	return fmt.Errorf("unsupported exp type '%s'", c.Exp)
 }
 
 func (c *Column) normalizeLogic() error {
@@ -182,7 +182,7 @@ func (c *Column) normalizeLogic() error {
 		c.Logic = logic
 		return nil
 	}
-	return fmt.Errorf("unsported logic type '%s'", c.Logic)
+	return fmt.Errorf("unsupported logic type '%s'", c.Logic)
 }
 
 func (c *Column) applyLike() error {

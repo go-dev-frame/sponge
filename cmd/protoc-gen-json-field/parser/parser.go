@@ -332,7 +332,7 @@ func toGoType(protoKind protoreflect.Kind) string {
 	case protoreflect.BytesKind:
 		return "[]byte"
 	default:
-		return fmt.Sprintf("unsported(%s)", protoKind.String())
+		return fmt.Sprintf("unsupported(%s)", protoKind.String())
 	}
 }
 
