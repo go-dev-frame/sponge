@@ -145,22 +145,44 @@ func (c *Column) checkExp() (string, error) {
 			if !ok1 {
 				return symbol, fmt.Errorf("invalid value type '%s'", c.Value)
 			}
-			// Use rune-safe slicing to preserve multi-byte characters
-			r := []rune(val)
-			if len(r) > 2 {
-				middle := string(r[1 : len(r)-1])
-				middle = strings.ReplaceAll(middle, "%", "\\%")
-				middle = strings.ReplaceAll(middle, "_", "\\_")
-				val = string(r[0]) + middle + string(r[len(r)-1])
+			// Preserve user-provided leading/trailing wildcards and escape only the inner content.
+			hasPrefixPercent := strings.HasPrefix(val, "%")
+			hasPrefixUnderscore := strings.HasPrefix(val, "_")
+			hasSuffixPercent := strings.HasSuffix(val, "%")
+			hasSuffixUnderscore := strings.HasSuffix(val, "_")
+
+			inner := val
+			if hasPrefixPercent || hasPrefixUnderscore {
+				inner = inner[1:]
 			}
-			if strings.HasPrefix(val, "%") ||
-				strings.HasPrefix(val, "_") ||
-				strings.HasSuffix(val, "%") ||
-				strings.HasSuffix(val, "_") {
-				c.Value = val
-			} else {
-				c.Value = "%" + val + "%"
+			if hasSuffixPercent || hasSuffixUnderscore {
+				if len(inner) > 0 {
+					inner = inner[:len(inner)-1]
+				}
 			}
+
+			// Escape inner occurrences of % and _
+			inner = strings.ReplaceAll(inner, "%", "\\%")
+			inner = strings.ReplaceAll(inner, "_", "\\_")
+
+			// Rebuild the value with original wildcards; if none were given, wrap with %...%
+			switch {
+			case hasPrefixPercent:
+				inner = "%" + inner
+			case hasPrefixUnderscore:
+				inner = "_" + inner
+			}
+			switch {
+			case hasSuffixPercent:
+				inner = inner + "%"
+			case hasSuffixUnderscore:
+				inner = inner + "_"
+			}
+
+			if !(hasPrefixPercent || hasPrefixUnderscore || hasSuffixPercent || hasSuffixUnderscore) {
+				inner = "%" + inner + "%"
+			}
+			c.Value = inner
 		case " IN ", " NOT IN ":
 			val, ok1 := c.Value.(string)
 			if ok1 {
