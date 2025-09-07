@@ -28,7 +28,7 @@ Sponge provides a one-stop project development solution, covering code generatio
 - **Standardized Best Practices**: Based on mature solutions from the Go community (Gin/gRPC/Protobuf, etc.), eliminating the hassle of technology selection.
 - **Minimal Learning Curve**: Get started quickly and focus on business logic through code generation and clear examples.
 - **Ideal for Team Collaboration**: Unified project structure improves code maintainability.
-- **AI Collaboration**: Based on Sponge's standardized directory and file structure, it intelligently generates business logic code, significantly reducing manual coding and improving development efficiency and code consistency.
+- **AI Collaborative Development**: Sponge’s built-in AI assistant understands directory and file structures, intelligently generates business logic code based on context, significantly reduces manual coding, and improves development efficiency and code consistency.
 
 <br>
 
@@ -113,11 +113,12 @@ Sponge provides an online experience for code generation: [**Code Generation**](
     <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_sponge-ui.png">
     </p>
 
-    - Connect to the database, select table names.
-    - Download Code: Get the complete code.
-    - Generate Swagger Docs: `make docs`.
-    - Run: `make run`.
-    - Test: Access the Swagger documentation at `http://localhost:8080/swagger/index.html` in your browser to test the API.
+    - Steps for running and testing the project locally:
+      - **Fill in parameters**: Connect to the database and select the table name.
+      - **Download code**: Obtain the complete project code.
+      - **Generate Swagger documentation**: Run the command `make docs`.
+      - **Start the service**: Run the command `make run`.
+      - **API testing**: Open `http://localhost:8080/swagger/index.html` in the browser and use the Swagger UI to test APIs.
 
 <br>
 

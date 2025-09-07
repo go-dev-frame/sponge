@@ -15,7 +15,7 @@ Sponge 提供一站式项目开发解决方案，涵盖代码生成、开发、�
 - **标准化最佳实践**：基于 Go 社区成熟方案（Gin/gRPC/Protobuf 等），避免技术选型纠结。  
 - **极简学习曲线**：通过代码生成和清晰示例，快速上手，专注业务逻辑。  
 - **适合团队协作**：统一项目结构，提升代码可维护性。
-- **AI协作**：基于 Sponge 规范目录与文件结构，智能生成业务逻辑代码，显著降低手工编码，提升开发效率与代码一致性。
+- **AI 协作开发**：Sponge 内置 AI 助手感知目录与文件结构，根据上下文智能生成业务逻辑代码，显著降低手工编码，提升开发效率与代码一致性。
 
 <br>
 
@@ -101,11 +101,12 @@ Sponge 提供在线体验生成代码：[**Code Generation**](https://go-sponge.
    <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-ui.png">
    </p>
 
-    - 连接数据库，选择表名。
-    - 下载代码：得到完整代码。
-    - 生成 swagger 文档：`make docs`。
-    - 运行：`make run`。
-    - 测试：在浏览器访问 swagger 文档 `http://localhost:8080/swagger/index.html` 测试 API。
+   - 项目本地运行与测试步骤：
+     - **填写参数**：连接数据库，选择表名。
+     - **下载代码**：获取完整项目代码。
+     - **生成 swagger 文档**：执行命令 `make docs`。
+     - **启动服务**：执行命令 `make run`。
+     - **接口测试**：在浏览器中访问 `http://localhost:8080/swagger/index.html` 通过 Swagger 界面进行 API 测试。
 
 <br>
 
