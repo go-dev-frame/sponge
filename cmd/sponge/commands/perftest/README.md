@@ -22,10 +22,10 @@ It can execute high-concurrency requests efficiently and push real-time statisti
 ### 📦 Installation
 
 ```bash
-go install github.com/go-dev-frame/sponge/cmd/perftest@latest
+go install github.com/go-dev-frame/sponge/cmd/sponge@latest
 ```
 
-After installation, run `perftest -h` to see usage.
+After installation, run `sponge perftest -h` to see usage.
 
 <br>
 

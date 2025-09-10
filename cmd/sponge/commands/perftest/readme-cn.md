@@ -22,10 +22,10 @@
 ### 📦 安装
 
 ```bash
-go install github.com/go-dev-frame/sponge/cmd/perftest@latest
+go install github.com/go-dev-frame/sponge/cmd/sponge@latest
 ```
 
-安装完成后，执行 `perftest -h` 查看帮助。
+安装完成后，执行 `sponge perftest -h` 查看帮助。
 
 <br>
 

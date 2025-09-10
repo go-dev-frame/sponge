@@ -24,7 +24,6 @@ var pluginNames = []string{
 	"protoc-gen-go-gin",
 	"protoc-gen-go-rpc-tmpl",
 	"protoc-gen-json-field",
-	"perftest",
 	"protoc-gen-openapiv2",
 	"protoc-gen-doc",
 	"swag",
@@ -42,7 +41,6 @@ var installPluginCommands = map[string]string{
 	"protoc-gen-go-gin":      "github.com/go-dev-frame/sponge/cmd/protoc-gen-go-gin@latest",
 	"protoc-gen-go-rpc-tmpl": "github.com/go-dev-frame/sponge/cmd/protoc-gen-go-rpc-tmpl@latest",
 	"protoc-gen-json-field":  "github.com/go-dev-frame/sponge/cmd/protoc-gen-json-field@latest",
-	"perftest":               "github.com/go-dev-frame/sponge/cmd/perftest@latest",
 	"protoc-gen-openapiv2":   "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest",
 	"protoc-gen-doc":         "github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest",
 	"swag":                   "github.com/swaggo/swag/cmd/swag@v1.8.12",
@@ -181,7 +179,7 @@ func installPlugins(lackNames []string) {
 
 func adaptInternalCommand(name string, pkgAddr string) string {
 	if name == "protoc-gen-go-gin" || name == "protoc-gen-go-rpc-tmpl" ||
-		name == "protoc-gen-json-field" || name == "perftest" {
+		name == "protoc-gen-json-field" {
 		if version != "v0.0.0" {
 			return strings.ReplaceAll(pkgAddr, "@latest", "@"+version)
 		}
