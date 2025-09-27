@@ -405,6 +405,22 @@ func isIgnoreFields(colName string, falseColumn ...string) bool {
 	return ok
 }
 
+var newlineIdentifier = []struct{ old, new string }{
+	{"\r\n", "\n//"},
+	{"\n", "\n//"},
+	{"\r", "\n//"},
+	{"\n////", "\n//"},
+}
+
+func replaceCommentNewline(comment string) string {
+	for _, r := range newlineIdentifier {
+		if strings.Contains(comment, r.old) {
+			comment = strings.ReplaceAll(comment, r.old, r.new)
+		}
+	}
+	return comment
+}
+
 type codeText struct {
 	importPaths   []string
 	modelStruct   string
@@ -451,7 +467,7 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (*codeText, error) {
 	// find table comment
 	for _, o := range stmt.Options {
 		if o.Tp == ast.TableOptionComment {
-			data.Comment = o.StrValue
+			data.Comment = replaceCommentNewline(o.StrValue)
 			break
 		}
 	}
@@ -529,7 +545,7 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (*codeText, error) {
 			case ast.ColumnOptionOnUpdate: // For Timestamp and Datetime only.
 			case ast.ColumnOptionFulltext:
 			case ast.ColumnOptionComment:
-				field.Comment = o.Expr.GetDatum().GetString()
+				field.Comment = replaceCommentNewline(o.Expr.GetDatum().GetString())
 			default:
 				//return "", nil, errors.Errorf(" unsupport option %d\n", o.Tp)
 			}
