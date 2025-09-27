@@ -37,6 +37,7 @@ func (c *statsCollector) collect(results <-chan Result, done chan<- struct{}) {
 	for r := range results {
 		if r.Err == nil {
 			c.successCount++
+			c.durations = append(c.durations, float64(r.Duration))
 		} else {
 			c.errorCount++
 			if _, ok := errSet[r.Err.Error()]; !ok {
@@ -46,11 +47,9 @@ func (c *statsCollector) collect(results <-chan Result, done chan<- struct{}) {
 		if _, ok := statusCodes[r.StatusCode]; !ok {
 			statusCodes[r.StatusCode] = 1
 		} else {
-			//statusCodes[r.StatusCode] += 1
 			statusCodes[r.StatusCode]++
 		}
 
-		c.durations = append(c.durations, float64(r.Duration))
 		c.totalReqBytes += r.ReqSize
 		c.totalRespBytes += r.RespSize
 	}
@@ -66,13 +65,14 @@ func (c *statsCollector) collectAndPush(ctx context.Context, results <-chan Resu
 	errSet := make(map[string]struct{})
 	statusCodes := make(map[int]int64)
 
-	pushTicker := time.NewTicker(time.Second)
+	pushTicker := time.NewTicker(p.pushInterval)
 	defer pushTicker.Stop()
 	start = time.Now()
 
 	for r := range results {
 		if r.Err == nil {
 			c.successCount++
+			c.durations = append(c.durations, float64(r.Duration))
 		} else {
 			c.errorCount++
 			if _, ok := errSet[r.Err.Error()]; !ok {
@@ -82,11 +82,9 @@ func (c *statsCollector) collectAndPush(ctx context.Context, results <-chan Resu
 		if _, ok := statusCodes[r.StatusCode]; !ok {
 			statusCodes[r.StatusCode] = 1
 		} else {
-			//statusCodes[r.StatusCode] += 1
 			statusCodes[r.StatusCode]++
 		}
 
-		c.durations = append(c.durations, float64(r.Duration))
 		c.totalReqBytes += r.ReqSize
 		c.totalRespBytes += r.RespSize
 		c.errSet = errSet
@@ -94,10 +92,13 @@ func (c *statsCollector) collectAndPush(ctx context.Context, results <-chan Resu
 		select {
 		case <-pushTicker.C:
 			spc.copyStatsCollector(c)
-			if p.PrometheusJobName != "" {
-				spc.PushToPrometheusAsync(ctx, p.PushURL, p.PrometheusJobName, time.Since(start))
+			if p.PrometheusJobName == "" {
+				spc.PushToServerAsync(ctx, p.PushURL, time.Since(start), p.Params, p.ID, p.agentID, AgentStatusRunning)
 			} else {
-				spc.PushToServerAsync(ctx, p.PushURL, time.Since(start), p.Params, p.ID)
+				spc.PushToPrometheusAsync(ctx, p.PushURL, p.PrometheusJobName, time.Since(start))
+				if p.clusterEnable {
+					spc.PushToServerAsync(ctx, p.pushToCollectorURL, time.Since(start), p.Params, p.ID, p.agentID, AgentStatusRunning)
+				}
 			}
 		default:
 			continue
@@ -116,7 +117,7 @@ func (c *statsCollector) toStatistics(totalTime time.Duration, totalRequests uin
 	}
 
 	var avg, minLatency, maxLatency float64
-	var p25, p50, p95 float64
+	var p25, p50, p95, p99 float64
 
 	if c.successCount > 0 {
 		avg = totalDuration / float64(c.successCount)
@@ -129,6 +130,7 @@ func (c *statsCollector) toStatistics(totalTime time.Duration, totalRequests uin
 		p25 = percentile(0.25)
 		p50 = percentile(0.50)
 		p95 = percentile(0.95)
+		p99 = percentile(0.99)
 	}
 
 	errors := []string{}
@@ -157,6 +159,7 @@ func (c *statsCollector) toStatistics(totalTime time.Duration, totalRequests uin
 		P25Latency: convertToMilliseconds(p25),
 		P50Latency: convertToMilliseconds(p50),
 		P95Latency: convertToMilliseconds(p95),
+		P99Latency: convertToMilliseconds(p99),
 		MinLatency: convertToMilliseconds(minLatency),
 		MaxLatency: convertToMilliseconds(maxLatency),
 
@@ -183,99 +186,105 @@ func float64ToStringNoRound(f float64) string {
 	return strconv.FormatFloat(f, 'f', -1, 64)
 }
 
-func (c *statsCollector) printReport(totalDuration time.Duration, totalRequests uint64, params *HTTPReqParams) (*Statistics, error) {
-	fmt.Printf("\n========== %s Performance Test Report ==========\n\n", params.version)
+func (c *statsCollector) printReport(totalDuration time.Duration, totalRequests uint64, params *HTTPReqParams, id string) (*Statistics, error) {
+	var builder Builder
+
+	builder.WriteStringf("\n========== %s Performance Test Report ==========\n\n", params.version)
 	if c.successCount == 0 {
-		_, _ = color.New(color.Bold).Println("[Requests]")
-		fmt.Printf("  • %-19s%d\n", "Total Requests:", totalRequests)
-		fmt.Printf("  • %-19s%d%s\n", "Successful:", 0, color.RedString(" (0%)"))
-		fmt.Printf("  • %-19s%d%s\n", "Failed:", c.errorCount, color.RedString(" ✗"))
-		fmt.Printf("  • %-19s%s s\n\n", "Total Duration:", float64ToString(totalDuration.Seconds(), 2))
+		builder.WriteString(color.New(color.Bold).Sprint("[Requests]\n"))
+		builder.WriteStringf("  • %-19s%d\n", "Total Requests:", totalRequests)
+		builder.WriteStringf("  • %-19s%d%s\n", "Successful:", 0, color.RedString(" (0%)"))
+		builder.WriteStringf("  • %-19s%d%s\n", "Failed:", c.errorCount, color.RedString(" ✗"))
+		builder.WriteStringf("  • %-19s%s s\n\n", "Total Duration:", float64ToString(totalDuration.Seconds(), 2))
 
 		if len(c.statusCodeSet) > 0 {
-			printStatusCodeSet(c.statusCodeSet)
+			printStatusCodeSet(&builder, c.statusCodeSet)
 		}
 
 		if len(c.errSet) > 0 {
-			printErrorSet(c.errSet)
+			printErrorSet(&builder, c.errSet)
 		}
+
+		fmt.Println(builder.String())
 		return nil, nil
 	}
 
 	st := c.toStatistics(totalDuration, totalRequests, params)
+	st.ID = id
 
-	_, _ = color.New(color.Bold).Println("[Requests]")
-	fmt.Printf("  • %-19s%d\n", "Total Requests:", st.TotalRequests)
+	builder.WriteString(color.New(color.Bold).Sprint("[Requests]\n"))
+	builder.WriteStringf("  • %-19s%d\n", "Total Requests:", st.TotalRequests)
 	successStr := fmt.Sprintf("  • %-19s%d", "Successful:", st.SuccessCount)
 	failureStr := fmt.Sprintf("  • %-19s%d", "Failed:", st.ErrorCount)
 	if st.TotalRequests > 0 {
+		if st.ErrorCount > 0 {
+			failureStr += color.RedString(" ✗ ")
+		}
 		if totalRequests == st.SuccessCount {
-			successStr += color.GreenString(" (100%)")
-		} else if st.ErrorCount > 0 {
-			if st.SuccessCount == 0 {
-				successStr += color.RedString(" (0%)")
-			} else {
-				percentage := float64ToString(float64(st.SuccessCount)/float64(st.TotalRequests)*100, 1)
-				successStr += color.YellowString(" (%s%%)", percentage)
-			}
-			failureStr += color.RedString(" ✗")
+			successStr += color.GreenString(" (100%) ")
+		} else {
+			percentage := float64ToString(float64(st.SuccessCount)/float64(st.TotalRequests)*100, 1)
+			successStr += color.YellowString(" (%s%%) ", percentage)
 		}
 	}
-	fmt.Println(successStr)
-	fmt.Println(failureStr)
-	fmt.Printf("  • %-19s%s s\n", "Total Duration:", float64ToStringNoRound(st.TotalDuration))
-	fmt.Printf("  • %-19s%s req/sec\n\n", "Throughput (QPS):", float64ToStringNoRound(st.QPS))
+	builder.WriteString(successStr + "\n")
+	builder.WriteString(failureStr + "\n")
+	builder.WriteStringf("  • %-19s%s s\n", "Total Duration:", float64ToStringNoRound(st.TotalDuration))
+	builder.WriteStringf("  • %-19s%s req/sec\n\n", "Throughput (QPS):", float64ToStringNoRound(st.QPS))
 
-	_, _ = color.New(color.Bold).Println("[Latency]")
-	fmt.Printf("  • %-19s%s ms\n", "Average:", float64ToStringNoRound(st.AvgLatency))
-	fmt.Printf("  • %-19s%s ms\n", "Minimum:", float64ToStringNoRound(st.MinLatency))
-	fmt.Printf("  • %-19s%s ms\n", "Maximum:", float64ToStringNoRound(st.MaxLatency))
-	fmt.Printf("  • %-19s%s ms\n", "P25:", float64ToStringNoRound(st.P25Latency))
-	fmt.Printf("  • %-19s%s ms\n", "P50:", float64ToStringNoRound(st.P50Latency))
-	fmt.Printf("  • %-19s%s ms\n\n", "P95:", float64ToStringNoRound(st.P95Latency))
+	builder.WriteString(color.New(color.Bold).Sprint("[Latency]\n"))
+	builder.WriteStringf("  • %-19s%s ms\n", "Average:", float64ToStringNoRound(st.AvgLatency))
+	builder.WriteStringf("  • %-19s%s ms\n", "Minimum:", float64ToStringNoRound(st.MinLatency))
+	builder.WriteStringf("  • %-19s%s ms\n", "Maximum:", float64ToStringNoRound(st.MaxLatency))
+	builder.WriteStringf("  • %-19s%s ms\n", "P25:", float64ToStringNoRound(st.P25Latency))
+	builder.WriteStringf("  • %-19s%s ms\n", "P50:", float64ToStringNoRound(st.P50Latency))
+	builder.WriteStringf("  • %-19s%s ms\n", "P95:", float64ToStringNoRound(st.P95Latency))
+	builder.WriteStringf("  • %-19s%s ms\n\n", "P99:", float64ToStringNoRound(st.P99Latency))
 
-	_, _ = color.New(color.Bold).Println("[Data Transfer]")
-	fmt.Printf("  • %-19s%d Bytes\n", "Sent:", st.TotalSent)
-	fmt.Printf("  • %-19s%d Bytes\n\n", "Received:", st.TotalReceived)
+	builder.WriteString(color.New(color.Bold).Sprint("[Data Transfer]\n"))
+	builder.WriteStringf("  • %-19s%d Bytes\n", "Sent:", st.TotalSent)
+	builder.WriteStringf("  • %-19s%d Bytes\n\n", "Received:", st.TotalReceived)
 
 	if len(c.statusCodeSet) > 0 {
-		printStatusCodeSet(st.StatusCodes)
+		printStatusCodeSet(&builder, st.StatusCodes)
 	}
 
 	if len(c.errSet) > 0 {
-		printErrorSet(c.errSet)
+		printErrorSet(&builder, c.errSet)
 	}
+
+	fmt.Printf("%s", builder.String())
 
 	return st, nil
 }
 
-func printStatusCodeSet(statusCodeSet map[int]int64) {
+func printStatusCodeSet(builder *Builder, statusCodeSet map[int]int64) {
 	codes := make([]int, 0, len(statusCodeSet))
 	for code := range statusCodeSet {
 		codes = append(codes, code)
 	}
 	sort.Ints(codes)
 
-	_, _ = color.New(color.Bold).Println("[Status Codes]")
+	builder.WriteString(color.New(color.Bold).Sprint("[Status Codes]\n"))
 	for _, code := range codes {
-		fmt.Printf("  • %-19s%d\n", fmt.Sprintf("%d:", code), statusCodeSet[code])
+		builder.WriteStringf("  • %-19s%d\n", fmt.Sprintf("%d:", code), statusCodeSet[code])
 	}
-	fmt.Println()
+	builder.WriteString("\n")
 }
 
-func printErrorSet(errSet map[string]struct{}) {
-	_, _ = color.New(color.Bold).Println("[Error Details]")
+func printErrorSet(builder *Builder, errSet map[string]struct{}) {
+	builder.WriteString(color.New(color.Bold).Sprint("[Error Details]\n"))
 	for errStr := range errSet {
-		fmt.Printf("  • %s\n", color.RedString(errStr))
+		builder.WriteStringf("  • %s\n", color.RedString(errStr))
 	}
-	fmt.Println()
+	builder.WriteString("\n")
 }
 
 // --------------------------------------------------------------------------------
 
-// Statistics statistical data
+// Statistics performance test statistical data
 type Statistics struct {
-	PerfTestID int64 `json:"perf_test_id"` // Performance Test ID
+	ID string `json:"id"` // Performance Test ID
 
 	URL    string `json:"url"`    // performed request URL
 	Method string `json:"method"` // request method
@@ -292,6 +301,7 @@ type Statistics struct {
 	P25Latency float64 `json:"p25_latency"` // 25th percentile latency (ms)
 	P50Latency float64 `json:"p50_latency"` // 50th percentile latency (ms)
 	P95Latency float64 `json:"p95_latency"` // 95th percentile latency (ms)
+	P99Latency float64 `json:"p99_latency"` // 95th percentile latency (ms)
 	MinLatency float64 `json:"min_latency"` // minimum latency (ms)
 	MaxLatency float64 `json:"max_latency"` // maximum latency (ms)
 
@@ -301,6 +311,9 @@ type Statistics struct {
 	StatusCodes map[int]int64 `json:"status_codes"` // status code distribution (count)
 
 	CreatedAt time.Time `json:"created_at"` // created time
+
+	Status  string `json:"status"`   // running, finished
+	AgentID string `json:"agent_id"` // identify agent
 }
 
 // Save saves the statistics data to a JSON file.
@@ -409,6 +422,9 @@ func (spc *statsPrometheusCollector) copyStatsCollector(s *statsCollector) {
 	if s.statusCodeSet != nil {
 		statusCodeSet = make(map[int]int64, len(s.statusCodeSet))
 		for k, v := range s.statusCodeSet {
+			if k == 0 {
+				k = -1
+			}
 			statusCodeSet[k] = v
 		}
 	}
@@ -504,19 +520,21 @@ func (spc *statsPrometheusCollector) PushToPrometheusAsync(ctx context.Context, 
 
 // PushToServer pushes the statistics data to a custom server
 // body is the JSON data of Statistics struct
-func (spc *statsPrometheusCollector) PushToServer(ctx context.Context, pushURL string, elapsed time.Duration, httpReqParams *HTTPReqParams, id int64) error {
+func (spc *statsPrometheusCollector) PushToServer(ctx context.Context, pushURL string, elapsed time.Duration, httpReqParams *HTTPReqParams, id string, agentID string, status AgentStatus) error {
 	statistics := spc.statsCollector.toStatistics(elapsed, spc.statsCollector.successCount+spc.statsCollector.errorCount, httpReqParams)
-	statistics.PerfTestID = id
+	statistics.ID = id
 	statistics.CreatedAt = time.Now()
+	statistics.AgentID = agentID
+	statistics.Status = string(status)
 
 	_, err := postWithContext(ctx, pushURL, statistics)
 	return err
 }
 
 // PushToServerAsync pushes the statistics data to a custom server asynchronously
-func (spc *statsPrometheusCollector) PushToServerAsync(ctx context.Context, pushURL string, elapsed time.Duration, httpReqParams *HTTPReqParams, id int64) {
+func (spc *statsPrometheusCollector) PushToServerAsync(ctx context.Context, pushURL string, elapsed time.Duration, httpReqParams *HTTPReqParams, id string, agentID string, status AgentStatus) {
 	go func() {
-		_ = spc.PushToServer(ctx, pushURL, elapsed, httpReqParams, id)
+		_ = spc.PushToServer(ctx, pushURL, elapsed, httpReqParams, id, agentID, status)
 	}()
 }
 

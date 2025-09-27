@@ -43,13 +43,19 @@ func NewBar(total int64, t time.Time) *Bar {
 // Increment advances the progress by 1 and redraws the bar if needed.
 func (b *Bar) Increment() {
 	atomic.AddInt64(&b.current, 1)
-	b.draw()
+	b.draw(false) // Regular draw, respects interval
 }
 
 // Finish marks the bar as complete and prints the final state.
 func (b *Bar) Finish() {
 	atomic.StoreInt64(&b.current, b.total)
-	b.draw()
+	b.draw(true) // Force final draw
+	fmt.Println()
+}
+
+// Stop halts the bar at its current progress and prints the final state.
+func (b *Bar) Stop() {
+	b.draw(true) // Force a final draw at the current state
 	fmt.Println()
 }
 
@@ -66,20 +72,16 @@ func (b *Bar) shouldDraw() bool {
 	}
 
 	// Attempt to update the timestamp
-	if b.lastDrawNano.CompareAndSwap(lastNano, now) {
-		return true
-	}
-	return false
+	return b.lastDrawNano.CompareAndSwap(lastNano, now)
 }
 
 // draw renders the bar in the terminal.
-// Uses shouldDraw to avoid excessive refreshes.
-func (b *Bar) draw() {
+// The 'force' parameter bypasses the update interval check.
+func (b *Bar) draw(force bool) {
 	current := atomic.LoadInt64(&b.current)
 
-	// Redraw only when reaching refresh interval or on completion.
-	// Finish() always forces a final draw.
-	if current < b.total && !b.shouldDraw() {
+	// Redraw only when forced, reaching refresh interval, or on completion.
+	if !force && current < b.total && !b.shouldDraw() {
 		return
 	}
 
@@ -149,16 +151,29 @@ func (b *TimeBar) Start() {
 	go b.run()
 }
 
-// Finish stops the progress bar and ensures the final state is drawn.
-func (b *TimeBar) Finish() {
+// stopped is an internal helper to handle shutting down the progress bar.
+func (b *TimeBar) stopped(isFinal bool) {
 	select {
 	case <-b.done:
+		// Already stopped, do nothing.
 		return
 	default:
+		// Signal the run goroutine to stop.
 		close(b.done)
 	}
-	b.wg.Wait()
-	fmt.Println()
+	b.wg.Wait()     // Wait for the goroutine to exit.
+	b.draw(isFinal) // Perform one final draw.
+	fmt.Println()   // Move to the next line.
+}
+
+// Finish stops the progress bar at 100%.
+func (b *TimeBar) Finish() {
+	b.stopped(true)
+}
+
+// Stop halts the progress bar at its current progress.
+func (b *TimeBar) Stop() {
+	b.stopped(false)
 }
 
 // run periodically refreshes the bar in the background.
@@ -171,11 +186,13 @@ func (b *TimeBar) run() {
 	for {
 		select {
 		case <-b.done:
-			b.draw(true)
+			// Stop signal received, exit the loop.
+			// The final draw is handled by the calling function (Finish/Stop).
 			return
 		case <-ticker.C:
 			if time.Since(b.startTime) >= b.totalDuration {
-				b.draw(true)
+				// Time has elapsed, exit.
+				// The final draw will be handled by Finish().
 				return
 			}
 			b.draw(false)
@@ -184,7 +201,7 @@ func (b *TimeBar) run() {
 }
 
 // draw renders the bar in the terminal.
-// isFinal indicates whether this is the last draw.
+// isFinal indicates whether this is the last draw (i.e., should show 100%).
 func (b *TimeBar) draw(isFinal bool) {
 	elapsed := time.Since(b.startTime)
 	percent := elapsed.Seconds() / b.totalDuration.Seconds()
@@ -207,11 +224,16 @@ func (b *TimeBar) draw(isFinal bool) {
 	if percent < 1.0 {
 		if filledLength < b.barWidth {
 			barBuilder.WriteString(b.arrow)
-			barBuilder.WriteString(strings.Repeat(b.space, b.barWidth-filledLength-1))
 		}
 	}
 
-	remainingSpace := b.barWidth - barBuilder.Len() + 1 // +1 for '['
+	// Ensure the bar's total visible length is consistent.
+	// Calculate remaining space inside the brackets `[]`.
+	currentLen := len(strings.Repeat(b.graph, filledLength))
+	if percent < 1.0 && filledLength < b.barWidth {
+		currentLen += len(b.arrow)
+	}
+	remainingSpace := b.barWidth - currentLen
 	if remainingSpace > 0 {
 		barBuilder.WriteString(strings.Repeat(b.space, remainingSpace))
 	}

@@ -1,8 +1,10 @@
 package http
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"runtime"
 	"time"
@@ -28,33 +30,53 @@ func PerfTestHTTPCMD() *cobra.Command {
 
 		out               string
 		pushURL           string
+		pushInterval      time.Duration
 		prometheusJobName string
+
+		// Cluster mode parameters
+		clusterEnable   bool
+		collectorHost   string
+		agentHost       string
+		agentID         string
+		loopTestSession bool
 	)
 
+	//nolint:lll
 	cmd := &cobra.Command{
 		Use:   "http",
-		Short: "Run performance test for HTTP/1.1 API",
-		Long:  "Run performance test for HTTP/1.1 API.",
-		Example: color.HiBlackString(`  # Default mode: worker=CPU*3, 5000 requests, GET request
-  sponge perftest http --url=http://localhost:8080/user/1
+		Short: "Run performance test for HTTP/1.1 APIs",
+		Long:  "Run performance test for HTTP/1.1 APIs.",
+		Example: color.HiBlackString(`  # Standalone Mode
 
-  # Fixed number of requests: 50 workers, 500k requests, GET request
-  sponge perftest http --worker=50 --total=500000 --url=http://localhost:8080/user/1
+    # Default parameters: 3*CPU workers, 5000 requests, GET method
+    sponge perftest http --url=http://192.168.1.200:8080/user/1
 
-  # Fixed number of requests: 50 workers, 500k requests, POST request with JSON body
-  sponge perftest http --worker=50 --total=500000 --url=http://localhost:8080/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
+    # Fixed number of requests: 50 workers, 500k requests, GET method
+    sponge perftest http --worker=50 --total=500000 --url=http://192.168.1.200:8080/user/1
 
-  # Fixed duration: 50 workers, duration 10s, GET request
-  sponge perftest http --worker=50 --duration=10s --url=http://localhost:8080/user/1
+    # Fixed number of requests: 3*CPU workers, 500k requests, POST method with JSON body
+    sponge perftest http --total=500000 --url=http://192.168.1.200:8080/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
 
-  # Fixed duration: 50 workers, duration 10s, POST request with JSON body
-  sponge perftest http --worker=50 --duration=10s --url=http://localhost:8080/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
+    # Fixed duration: 3*CPU workers, duration 10s, GET method
+    sponge perftest http --duration=10s --url=http://192.168.1.200:8080/user/1
 
-  # Fixed number of requests: 50 workers, 500k requests, GET request, push statistics to custom HTTP server every 1s
-  sponge perftest http --worker=50 --total=500000 --url=http://localhost:8080/user/1 --push-url=http://localhost:7070/report
+    # Fixed duration: 3*CPU workers, duration 10s, POST method with JSON body
+    sponge perftest http --duration=10s --url=http://192.168.1.200:8080/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
 
-  # Fixed duration: 50 workers, duration 10s, get request, push statistics to Prometheus (job=xxx)
-  sponge perftest http --worker=50 --duration=10s --url=http://localhost:8080/user/1 --push-url=http://localhost:9091/metrics --prometheus-job-name=perftest-http`),
+    # Fixed number of requests: 3*CPU workers, 500k requests, GET method, push statistics to custom HTTP endpoints every second by default
+    sponge perftest http --total=500000 --url=http://192.168.1.200:8080/user/1 --push-url=http://localhost:7070/report
+
+    # Fixed duration: 3*CPU workers, duration 10s, GET method, push statistics to prometheus (job=xxx) every second by default
+    sponge perftest http --duration=10s --url=http://192.168.1.200:8080/user/1 --push-url=http://localhost:9090 --prometheus-job-name=perftest-http
+
+
+  # Cluster Mode, add parameter '--cluster-enable', '--collector-host, --agent-host', '--agent-id' on the basis of standalone mode
+
+    # Fixed number of requests: 3*CPU workers, 500k requests, GET method, push statistics to collector (master) every second by default
+    sponge perftest http --total=500000 --url=http://192.168.1.200:8080/user/1 --cluster-enable=true --collector-host=http://192.168.1.10:8888 --agent-host=http://192.168.1.20:9999 --agent-id=agent-1
+
+    # Fixed duration: 3*CPU workers, duration 10s, GET method, push statistics to collector (master) every second by default
+    sponge perftest http --duration=10s --url=http://192.168.1.200:8080/user/1 --cluster-enable=true --collector-host=http://192.168.1.10:8888 --agent-host=http://192.168.1.20:9999 --agent-id=agent-1`),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -71,40 +93,49 @@ func PerfTestHTTPCMD() *cobra.Command {
 				version: "HTTP/1.1",
 			}
 
-			b := PerfTestHTTP{
-				ID:                common.NewID(),
-				Client:            newHTTPClient(),
+			p := &PerfTestHTTP{
+				ID:                common.NewStringID(),
+				Client:            newHTTPClient(worker),
 				Params:            params,
 				Worker:            worker,
 				TotalRequests:     total,
 				Duration:          duration,
 				PushURL:           pushURL,
+				pushInterval:      pushInterval,
 				PrometheusJobName: prometheusJobName,
+
+				clusterEnable: clusterEnable,
+				agentID:       agentID,
 			}
-			if err = b.checkParams(); err != nil {
+			if err = p.checkParams(); err != nil {
 				return err
 			}
 
-			var stats *Statistics
-			if duration > 0 {
-				stats, err = b.RunWithFixedDuration()
-			} else {
-				stats, err = b.RunWithFixedRequestsNum()
-			}
+			ctx := captureSignal()
 
-			if err != nil {
-				return err
-			}
-			if out != "" && stats != nil {
-				err = stats.Save(out)
+			if clusterEnable {
+				var agent *Agent
+				agent, err = NewAgent(agentID, collectorHost, agentHost, targetURL, method)
 				if err != nil {
-					fmt.Println()
-					return fmt.Errorf("failed to save statistics to file: %s", err)
+					return err
 				}
-				fmt.Printf("\nsave statistics to '%s' successfully\n", out)
+				agent.runPerformanceTestFn = func(testCtx context.Context, testID string) error {
+					p.pushToCollectorURL = fmt.Sprintf("%s/tests/%s/report", collectorHost, testID)
+					if prometheusJobName == "" {
+						p.PushURL = p.pushToCollectorURL // force push to collector host
+					}
+					return p.Run(testCtx, duration, out)
+				}
+				err = agent.Run(ctx, loopTestSession)
+			} else {
+				err = p.Run(ctx, duration, out)
 			}
 
-			return nil
+			if ctx.Err() != nil {
+				time.Sleep(500 * time.Millisecond) // wait for all goroutines to exit
+			}
+
+			return err
 		},
 	}
 
@@ -120,20 +151,38 @@ func PerfTestHTTPCMD() *cobra.Command {
 	cmd.Flags().DurationVarP(&duration, "duration", "d", 0, "duration of the test, e.g., 10s, 1m (priority higher than --total)")
 
 	cmd.Flags().StringVarP(&out, "out", "o", "", "save statistics to JSON file")
-	cmd.Flags().StringVarP(&pushURL, "push-url", "p", "", "push statistics to target URL once per second ")
+	cmd.Flags().StringVarP(&pushURL, "push-url", "p", "", "push statistics to target URL ")
+	cmd.Flags().DurationVarP(&pushInterval, "push-interval", "i", time.Second, "push statistics interval, ranging from 100ms to 10s")
 	cmd.Flags().StringVarP(&prometheusJobName, "prometheus-job-name", "j", "", "if not empty, the --push-url parameter value indicates prometheus url")
+
+	// Cluster mode parameters
+	cmd.Flags().BoolVar(&clusterEnable, "cluster-enable", false, "enable cluster mode")
+	cmd.Flags().StringVar(&collectorHost, "collector-host", "", "collector host, also known as cluster master (e.g. http://192.168.1.10:8888)")
+	cmd.Flags().StringVar(&agentHost, "agent-host", "", "callback host for this agent (e.g. http://192.168.1.20:9999)")
+	cmd.Flags().StringVar(&agentID, "agent-id", "", "unique id for this agent (e.g. agent-1)")
+	cmd.Flags().BoolVar(&loopTestSession, "loop-test-session", false, "if set to true, the agent runs indefinitely until the service is terminated. If false, it terminates after the test completes")
 
 	return cmd
 }
 
-func newHTTPClient() *http.Client {
+func newHTTPClient(worker int) *http.Client {
+	if worker <= 0 {
+		worker = runtime.NumCPU() * 3
+	}
 	return &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, // Skip certificate validation
-			MaxIdleConns:        1000,
-			MaxIdleConnsPerHost: 1000,
-			IdleConnTimeout:     90 * time.Second,
+			Proxy: http.ProxyFromEnvironment,
+			DialContext: (&net.Dialer{
+				Timeout:   5 * time.Second,
+				KeepAlive: 15 * time.Second,
+			}).DialContext,
+			MaxIdleConns:          worker + 10, // default 100
+			MaxIdleConnsPerHost:   worker,      // default 2
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,                       // default 1 second
+			TLSClientConfig:       &tls.Config{InsecureSkipVerify: true}, // skip certificate validation
 		},
-		Timeout: 10 * time.Second,
+		Timeout: 15 * time.Second,
 	}
 }

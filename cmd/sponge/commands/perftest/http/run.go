@@ -21,7 +21,7 @@ import (
 
 // PerfTestHTTP performance test parameters for HTTP
 type PerfTestHTTP struct {
-	ID int64 // performance test ID
+	ID string // performance test ID
 
 	Client *http.Client
 	Params *HTTPReqParams
@@ -32,6 +32,11 @@ type PerfTestHTTP struct {
 
 	PushURL           string
 	PrometheusJobName string
+	pushInterval      time.Duration
+
+	agentID            string
+	clusterEnable      bool
+	pushToCollectorURL string
 }
 
 func (p *PerfTestHTTP) checkParams() error {
@@ -47,18 +52,50 @@ func (p *PerfTestHTTP) checkParams() error {
 		return errors.New("'--prometheus-job-name' has already been set, '--push-url' must be set")
 	}
 
+	if p.pushInterval < time.Millisecond*100 || p.pushInterval > time.Second*10 {
+		p.pushInterval = time.Second
+	}
+
+	return nil
+}
+
+// Run the performance test with fixed number of requests or fixed duration.
+func (p *PerfTestHTTP) Run(ctx context.Context, duration time.Duration, out string) error {
+	var err error
+	var stats *Statistics
+	if duration > 0 {
+		stats, err = p.RunWithFixedDuration(ctx)
+	} else {
+		stats, err = p.RunWithFixedRequestsNum(ctx)
+	}
+
+	if err != nil {
+		return err
+	}
+	if out != "" && stats != nil {
+		err = stats.Save(out)
+		if err != nil {
+			fmt.Println()
+			return fmt.Errorf("failed to save statistics to file: %s", err)
+		}
+		fmt.Printf("\nsave statistics to '%s' successfully\n", out)
+	}
 	return nil
 }
 
 // RunWithFixedRequestsNum implements performance with a fixed number of requests.
-func (p *PerfTestHTTP) RunWithFixedRequestsNum() (*Statistics, error) {
-	ctx, cancel := context.WithCancel(context.Background())
+func (p *PerfTestHTTP) RunWithFixedRequestsNum(globalCtx context.Context) (*Statistics, error) {
+	ctx, cancel := context.WithCancel(context.Background()) //nolint
 	defer cancel()
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-sigCh
-		cancel()
+		select {
+		case <-globalCtx.Done():
+			if ctx.Err() == nil {
+				cancel()
+			}
+		case <-ctx.Done():
+			return
+		}
 	}()
 
 	var wg sync.WaitGroup
@@ -84,7 +121,6 @@ func (p *PerfTestHTTP) RunWithFixedRequestsNum() (*Statistics, error) {
 		} else {
 			spc = newStatsPrometheusCollector()
 		}
-		//go collector.collectAndPush(ctx, resultCh, statsDone, spc, b.PushURL, b.PrometheusJobName, b.Params, start)
 		go collector.collectAndPush(ctx, resultCh, statsDone, spc, p, start)
 	}
 
@@ -118,35 +154,40 @@ loop:
 
 	<-statsDone
 
+	var status AgentStatus
 	totalTime := time.Since(start)
 	if ctx.Err() == nil {
 		bar.Finish()
+		status = AgentStatusFinished
 	} else {
-		fmt.Println()
+		bar.Stop()
+		status = AgentStatusStopped
 	}
 
-	statistics, err := collector.printReport(totalTime, p.TotalRequests, p.Params)
+	statistics, err := collector.printReport(totalTime, p.TotalRequests, p.Params, p.ID)
 
 	if p.PushURL != "" {
 		spc.copyStatsCollector(collector)
-		pushStatistics(spc, p, totalTime)
+		pushStatistics(spc, p, totalTime, status)
 	}
 
 	return statistics, err
 }
 
 // RunWithFixedDuration implements performance with a fixed duration.
-func (p *PerfTestHTTP) RunWithFixedDuration() (*Statistics, error) {
+func (p *PerfTestHTTP) RunWithFixedDuration(globalCtx context.Context) (*Statistics, error) {
 	// Create a context that will be canceled when the duration is over
-	ctx, cancel := context.WithTimeout(context.Background(), p.Duration)
+	ctx, cancel := context.WithTimeout(context.Background(), p.Duration) //nolint
 	defer cancel()
-
-	// Handle manual interruption (Ctrl+C)
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-sigCh
-		cancel()
+		select {
+		case <-globalCtx.Done():
+			if ctx.Err() == nil {
+				cancel()
+			}
+		case <-ctx.Done():
+			return
+		}
 	}()
 
 	var wg sync.WaitGroup
@@ -203,38 +244,48 @@ func (p *PerfTestHTTP) RunWithFixedDuration() (*Statistics, error) {
 	// Wait for the collector to process all the results in the channel
 	<-statsDone
 
+	var status AgentStatus
 	if errors.Is(ctx.Err(), context.Canceled) {
-		fmt.Println()
+		bar.Stop()
+		status = AgentStatusStopped
 	} else {
 		bar.Finish()
+		status = AgentStatusFinished
 	}
 
 	// The total number of requests is the count of collected results
 	totalRequests := collector.successCount + collector.errorCount
-	statistics, err := collector.printReport(totalTime, totalRequests, p.Params)
+	statistics, err := collector.printReport(totalTime, totalRequests, p.Params, p.ID)
 
 	if p.PushURL != "" {
 		spc.copyStatsCollector(collector)
-		pushStatistics(spc, p, totalTime)
+		pushStatistics(spc, p, totalTime, status)
 	}
 
 	return statistics, err
 }
 
-func pushStatistics(spc *statsPrometheusCollector, b *PerfTestHTTP, totalTime time.Duration) {
-	var err error
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3) //nolint
-	if b.PrometheusJobName == "" {
-		err = spc.PushToServer(ctx, b.PushURL, totalTime, b.Params, b.ID)
+func pushStatistics(spc *statsPrometheusCollector, p *PerfTestHTTP, totalTime time.Duration, status AgentStatus) {
+	var err, err2 error
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5) //nolint
+	if p.PrometheusJobName == "" {
+		err = spc.PushToServer(ctx, p.PushURL, totalTime, p.Params, p.ID, p.agentID, status)
 	} else {
-		err = spc.PushToPrometheus(ctx, b.PushURL, b.PrometheusJobName, totalTime)
+		err = spc.PushToPrometheus(ctx, p.PushURL, p.PrometheusJobName, totalTime)
+		if p.clusterEnable {
+			err2 = spc.PushToServer(ctx, p.pushToCollectorURL, totalTime, p.Params, p.ID, p.agentID, status)
+		}
 	}
 	_, _ = color.New(color.Bold).Println("[Push Statistics]")
 	var result = color.GreenString("ok")
 	if err != nil {
 		result = color.RedString("%v", err)
 	}
-	fmt.Printf("  • %s\n", result)
+	fmt.Printf("  • %s\n\n", result)
+	if err2 != nil {
+		result = color.RedString("push to collector failed: %v", err2)
+		fmt.Printf("  • %s\n\n", result)
+	}
 }
 
 // -------------------------------------------------------------------------------------------
@@ -338,4 +389,17 @@ func requestOnce(client *http.Client, params *HTTPReqParams, ch chan<- Result) {
 		RespSize:   respSize,
 		StatusCode: resp.StatusCode,
 	}
+}
+
+func captureSignal() context.Context {
+	ctx, cancel := context.WithCancel(context.Background())
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM) // handle manual interruption (Ctrl+C)
+	go func() {
+		<-sigCh
+		if ctx.Err() == nil {
+			cancel()
+		}
+	}()
+	return ctx
 }
