@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -16,6 +17,11 @@ import (
 
 // Parse configuration files to struct, including yaml, toml, json, etc., and turn on listening for configuration file changes if fs is not empty
 func Parse(configFile string, obj interface{}, reloads ...func()) error {
+	v := reflect.ValueOf(obj)
+	if v.Kind() != reflect.Ptr || v.IsNil() {
+		return fmt.Errorf("obj must be a non-nil pointer")
+	}
+
 	confFileAbs, err := filepath.Abs(configFile)
 	if err != nil {
 		return err
@@ -47,7 +53,7 @@ func Parse(configFile string, obj interface{}, reloads ...func()) error {
 	return nil
 }
 
-// ParseConfigData parse data to struct
+// ParseConfigData parse data to struct, parameter format is the configuration file format, such as "yaml", "json", "toml"
 func ParseConfigData(data []byte, format string, obj interface{}) error {
 	viper.SetConfigType(format)
 	err := viper.ReadConfig(bytes.NewBuffer(data))
@@ -64,6 +70,10 @@ func watchConfig(obj interface{}, reloads ...func()) {
 
 	// Note: OnConfigChange is called twice on Windows
 	viper.OnConfigChange(func(e fsnotify.Event) {
+		t := reflect.TypeOf(obj).Elem()
+		v := reflect.New(t)
+		reflect.ValueOf(obj).Elem().Set(v.Elem()) // reset object
+
 		err := viper.Unmarshal(obj)
 		if err != nil {
 			fmt.Println("viper.Unmarshal error: ", err)

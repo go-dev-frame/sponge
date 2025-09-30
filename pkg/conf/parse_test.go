@@ -37,14 +37,11 @@ func Test_hideSensitiveFields(t *testing.T) {
 func TestParse(t *testing.T) {
 	conf := make(map[string]interface{})
 
-	reloads := []func(){
-		func() {
-			fmt.Println("close and reconnect mysql")
-			fmt.Println("close and reconnect redis")
-		},
+	handleChangeConfig := func() {
+		fmt.Println("config file changed, do something here")
 	}
 
-	err := Parse("test.yml", &conf, reloads...)
+	err := Parse("test.yml", &conf, handleChangeConfig)
 	if err != nil {
 		t.Error(err)
 		return
