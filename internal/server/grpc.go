@@ -66,8 +66,9 @@ func (s *grpcServer) Start() error {
 	if s.mux != nil {
 		addr := fmt.Sprintf(":%d", config.Get().Grpc.HTTPPort)
 		s.httpServer = &http.Server{
-			Addr:    addr,
-			Handler: s.mux,
+			Addr:        addr,
+			Handler:     s.mux,
+			IdleTimeout: time.Second * 60,
 		}
 		go func() {
 			fmt.Printf("http address of pprof and metrics %s\n", addr)

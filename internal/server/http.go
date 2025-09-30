@@ -76,6 +76,7 @@ func NewHTTPServer(addr string, opts ...HTTPOption) app.IServer {
 		Handler: router,
 		//ReadTimeout:    time.Second*30,
 		//WriteTimeout:   time.Second*60,
+		IdleTimeout:    time.Second * 60,
 		MaxHeaderBytes: 1 << 20,
 	}
 
@@ -106,6 +107,7 @@ func NewHTTPServer_pbExample(addr string, opts ...HTTPOption) app.IServer { //no
 		Handler: router,
 		//ReadTimeout:    time.Second*30,
 		//WriteTimeout:   time.Second*60,
+		IdleTimeout:    time.Second * 60,
 		MaxHeaderBytes: 1 << 20,
 	}
 
