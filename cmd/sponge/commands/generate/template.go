@@ -370,7 +370,19 @@ func NewCenter(configFile string) (*Center, error) {
 	httpServerConfigCode = `# http server settings
 http:
   port: 8080                # listen port
-  timeout: 0                # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s`
+  httpsPort: 8443           # https listen port when tls is enabled
+  timeout: 0                # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s
+  idleTimeout: 60           # http idle timeout, unit(second)
+  readTimeout: 30           # http read timeout, unit(second)
+  writeTimeout: 30          # http write timeout, unit(second)
+  tls:
+    domains:
+      - ""              # list of domains for automatic tls certificates, empty disables tls
+    acmeDirectory: "https://acme-v02.api.letsencrypt.org/directory" # acme directory url
+    storagePath: "./storage/autocert"   # directory to cache certificates
+    eab:
+      kid: ""              # external account binding key identifier
+      hmacKey: ""          # base64url encoded external account binding hmac key`
 
 	rpcServerConfigCode = `# grpc server settings
 grpc:
