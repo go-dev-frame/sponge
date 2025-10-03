@@ -3,7 +3,6 @@ package httpcli
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	json "github.com/bytedance/sonic"
 )
 
 const defaultTimeout = 30 * time.Second

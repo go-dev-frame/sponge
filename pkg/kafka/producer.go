@@ -2,10 +2,10 @@
 package kafka
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/IBM/sarama"
+	json "github.com/bytedance/sonic"
 	"go.uber.org/zap"
 )
 

@@ -32,13 +32,16 @@ func runResponseHTTPServer() string {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.GET("/success", func(c *gin.Context) { Success(c, gin.H{"foo": "bar"}) })
-	r.GET("/error", func(c *gin.Context) { Error(c, errcode.Unauthorized) })
+	for _, out := range outs {
+		if out.Code() == 0 {
+			continue
+		}
+		r.GET(fmt.Sprintf("/error/code/%d", out.Code()), func(c *gin.Context) { Error(c, out) })
+	}
 	for _, code := range httpResponseCodes {
-		code := code
 		r.GET(fmt.Sprintf("/code/%d", code), func(c *gin.Context) { Output(c, code) })
 	}
 	for _, out := range outs {
-		out := out
 		r.GET(fmt.Sprintf("/out/code/%d", out.ToHTTPCode()), func(c *gin.Context) { Out(c, out) })
 	}
 
@@ -61,15 +64,21 @@ func TestRespond(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result.Data)
 
-	result = &httpcli.StdResult{}
-	err = httpcli.Get(result, requestAddr+"/error")
-	assert.NoError(t, err)
-	assert.NotEqual(t, 0, result.Code)
+	for _, out := range outs {
+		if out.Code() == 0 {
+			continue
+		}
+		result = &httpcli.StdResult{}
+		url := fmt.Sprintf("%s/error/code/%d", requestAddr, out.Code())
+		err = httpcli.Get(result, url)
+		assert.NoError(t, err)
+		assert.NotEqual(t, 0, result.Code)
+	}
 
 	for _, code := range httpResponseCodes {
-		result := &httpcli.StdResult{}
+		result = &httpcli.StdResult{}
 		url := fmt.Sprintf("%s/code/%d", requestAddr, code)
-		err := httpcli.Get(result, url)
+		err = httpcli.Get(result, url)
 		if code == http.StatusOK {
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, result.Code)
@@ -78,9 +87,9 @@ func TestRespond(t *testing.T) {
 		assert.Error(t, err)
 	}
 	for _, out := range outs {
-		result := &httpcli.StdResult{}
+		result = &httpcli.StdResult{}
 		url := fmt.Sprintf("%s/out/code/%d", requestAddr, out.ToHTTPCode())
-		err := httpcli.Get(result, url)
+		err = httpcli.Get(result, url)
 		if out.ToHTTPCode() == http.StatusOK {
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, result.Code)
