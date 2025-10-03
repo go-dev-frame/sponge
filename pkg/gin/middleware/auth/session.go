@@ -1,16 +1,31 @@
-package rails
+package auth
+
+// 1. Universal session management is implemented using the library available at https://github.com/gin-contrib/sessions,
+// which provides Gin middleware for session management with support:
+//
+// cookie-based
+// Redis
+// memcached
+// MongoDB
+// GORM
+// memstore
+// PostgreSQL
+// Filesystem
+
+// -------------------------------------------------------------------------------------------
+
+// 2. Special session for rails
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
-	"crypto/sha256"
-
+	json "github.com/bytedance/sonic"
 	"golang.org/x/crypto/pbkdf2"
 )
 
