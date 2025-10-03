@@ -187,7 +187,7 @@ func (h *Hub) run() {
 				case cli.Send <- ue.Event:
 				//h.zapLogger.Info("[sse] pushed event to client", zap.String("uid", ue.UID), zap.String("event_id", ue.Event.ID))
 				default:
-					trySendWithTimeout(h, cli, ue, 3*time.Second)
+					trySendWithTimeout(h, cli, ue, 5*time.Second)
 				}
 			}
 
@@ -248,7 +248,7 @@ func pushOne(h *Hub, ue *UserEvent) {
 	default:
 		// use async task pool to submit push task with timeout retry
 		h.asyncTaskPool.Submit(func() {
-			tryPushWithTimeout(h, ue, 3*time.Second)
+			tryPushWithTimeout(h, ue, 5*time.Second)
 		})
 	}
 }
@@ -373,6 +373,18 @@ func (h *Hub) OnlineClientsNum() int {
 
 // Close event center and stop all worker
 func (h *Hub) Close() {
+	if h.OnlineClientsNum() > 0 {
+		h.zapLogger.Info("[sse] closing clients", zap.Int("client_num", h.OnlineClientsNum()))
+	}
+	h.clients.Range(func(uidKey, cliVal interface{}) bool {
+		cli := cliVal.(*UserClient)
+		if h.clients.Has(cli.UID) {
+			h.clients.Delete(cli.UID)
+			close(cli.Send)
+		}
+		return true
+	})
+
 	h.cancel()
 	h.asyncTaskPool.Wait()
 	h.asyncTaskPool.Stop()

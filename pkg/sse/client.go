@@ -2,13 +2,13 @@ package sse
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
+	json "github.com/bytedance/sonic"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +23,7 @@ type clientOptions struct {
 func defaultClientOptions() *clientOptions {
 	logger, _ := zap.NewProduction()
 	return &clientOptions{
-		reconnectTimeInterval: 3 * time.Second,
+		reconnectTimeInterval: 5 * time.Second,
 		zapLogger:             logger,
 	}
 }
