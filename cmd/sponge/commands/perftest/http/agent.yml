@@ -1,0 +1,19 @@
+# 1. Test protocol configuration, supported protocols: http | http2 | http3
+protocol: http
+
+# 2. Target API to test configuration
+testURL: "http://localhost:8080/get"
+method: "GET"  # supported methods: GET | POST | PUT | DELETE | PATCH
+body: ""         # supported data types: JSON | Form-data | Text. JSON example: {\"key1\": \"value1\", \"key2\": \"value2\"}
+headers:
+  - "Authorization: Bearer <token>"
+  #- "Content-Type: application/json"
+
+# 3. Testing strategy configuration, supporting fixed number of requests and fixed time, choose one of them
+#total: 500000          # total requests to send
+duration: 10s         # test duration (e.g., 10s, 1m)
+
+# 4. Service registration, ensure agent and collector can communicate with each other
+collectorHost: "http://localhost:8888"
+agentHost: "http://localhost:6601"
+agentPushInterval: 1s

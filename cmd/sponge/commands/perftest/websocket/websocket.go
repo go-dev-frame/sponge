@@ -35,19 +35,20 @@ func PerfTestWebsocketCMD() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "websocket",
-		Short: "Run performance test for websocket",
-		Long:  "Run performance test for websocket.",
+		Short: "Run a performance test against WebSocket service",
+		Long:  "Run a performance test against WebSocket service.",
 		Example: color.HiBlackString(`  # Default: 10 workers, 10s duration, random(10) string message
-  sponge perftest websocket --url=ws://localhost:8080/ws
+  %s websocket --url=ws://localhost:8080/ws
 
   # Send fixed string messages, 100 workers, 1m duration, each worker sends messages every 10ms
-  sponge perftest websocket --worker=100 --duration=1m --send-interval=10ms --body-string=abcdefghijklmnopqrstuvwxyz --url=ws://localhost:8080/ws
+  %s websocket --worker=100 --duration=1m --send-interval=10ms --body-string=abcdefghijklmnopqrstuvwxyz --url=ws://localhost:8080/ws
 
   # Send JSON messages, 10 workers, 10s duration
-  sponge perftest websocket --worker=10 --duration=10s --body={\"name\":\"Alice\",\"age\":25} --url=ws://localhost:8080/ws
+  %s websocket --worker=10 --duration=10s --body={\"name\":\"Alice\",\"age\":25} --url=ws://localhost:8080/ws
 
   # Send JSON messages, 100 workers, 1m duration, each worker sends messages every 10ms
-  sponge perftest websocket --worker=100 --duration=1m --send-interval=10ms --body={\"name\":\"Alice\",\"age\":25} --url=ws://localhost:8080/ws`),
+  %s websocket --worker=100 --duration=1m --send-interval=10ms --body={\"name\":\"Alice\",\"age\":25} --url=ws://localhost:8080/ws`,
+			common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {

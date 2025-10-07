@@ -45,39 +45,40 @@ func PerfTestHTTP3CMD() *cobra.Command {
 	//nolint:lll
 	cmd := &cobra.Command{
 		Use:   "http3",
-		Short: "Run performance test for HTTP/3 APIs",
-		Long:  "Run performance test for HTTP/3 APIs.",
+		Short: "Run a performance test against HTTP/3 APIs",
+		Long:  "Run a performance test against HTTP/3 APIs.",
 		Example: color.HiBlackString(`  # Standalone Mode
 
     # Default parameters: 3*CPU workers, 5000 requests, GET method
-    sponge perftest http3 --url=https://l192.168.1.200:8443/user/1
+    %s http3 --url=https://l192.168.1.200:8443/user/1
 
     # Fixed number of requests: 50 workers, 500k requests, GET method
-    sponge perftest http3 --worker=50 --total=500000 --url=https://l192.168.1.200:8443/user/1
+    %s http3 --worker=50 --total=500000 --url=https://l192.168.1.200:8443/user/1
 
     # Fixed number of requests: 3*CPU workers, 500k requests, POST method with JSON body
-    sponge perftest http3 --total=500000 --url=https://l192.168.1.200:8443/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
+    %s http3 --total=500000 --url=https://l192.168.1.200:8443/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
 
     # Fixed duration: 3*CPU workers, duration 10s, GET method
-    sponge perftest http3 --duration=10s --url=https://l192.168.1.200:8443/user/1
+    %s http3 --duration=10s --url=https://l192.168.1.200:8443/user/1
 
     # Fixed duration: 3*CPU workers, duration 10s, POST method with JSON body
-    sponge perftest http3 --duration=10s --url=https://l192.168.1.200:8443/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
+    %s http3 --duration=10s --url=https://l192.168.1.200:8443/user --method=POST --body={\"name\":\"Alice\",\"age\":25}
 
     # Fixed number of requests: 3*CPU workers, 500k requests, GET method, push statistics to custom HTTP endpoints every second by default
-    sponge perftest http3 --total=500000 --url=https://l192.168.1.200:8443/user/1 --push-url=http://localhost:7070/report
+    %s http3 --total=500000 --url=https://l192.168.1.200:8443/user/1 --push-url=http://localhost:7070/report
 
     # Fixed duration: 3*CPU workers, duration 10s, GET method, push statistics to prometheus (job=xxx) every second by default
-    sponge perftest http3 --duration=10s --url=https://l192.168.1.200:8443/user/1 --push-url=http://localhost:9090 --prometheus-job-name=perftest-http3
+    %s http3 --duration=10s --url=https://l192.168.1.200:8443/user/1 --push-url=http://localhost:9090 --prometheus-job-name=perftest-http3
 
 
   # Cluster Mode, add parameter '--cluster-enable', '--collector-host, --agent-host', '--agent-id' on the basis of standalone mode
 
     # Fixed number of requests: 3*CPU workers, 500k requests, GET method, push statistics to collector (master) every second by default
-    sponge perftest http3 --total=500000 --url=https://l192.168.1.200:8443/user/1 --cluster-enable=true --collector-host=http://192.168.1.10:8888 --agent-host=http://192.168.1.20:9999 --agent-id=agent-1
+    %s http3 --total=500000 --url=https://l192.168.1.200:8443/user/1 --cluster-enable=true --collector-host=http://192.168.1.10:8888 --agent-host=http://192.168.1.60:6601 --agent-id=agent-1
 
     # Fixed duration: 3*CPU workers, duration 10s, GET method, push statistics to collector (master) every second by default
-    sponge perftest http3 --duration=10s --url=https://l192.168.1.200:8443/user/1 --cluster-enable=true --collector-host=http://192.168.1.10:8888 --agent-host=http://192.168.1.20:9999 --agent-id=agent-1`),
+    %s http3 --duration=10s --url=https://l192.168.1.200:8443/user/1 --cluster-enable=true --collector-host=http://192.168.1.10:8888 --agent-host=http://192.168.1.60:6601 --agent-id=agent-1`,
+			common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix, common.CommandPrefix),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -159,7 +160,7 @@ func PerfTestHTTP3CMD() *cobra.Command {
 	// Cluster mode parameters
 	cmd.Flags().BoolVar(&clusterEnable, "cluster-enable", false, "enable cluster mode")
 	cmd.Flags().StringVar(&collectorHost, "collector-host", "", "collector host, also known as cluster master (e.g. http://192.168.1.10:8888)")
-	cmd.Flags().StringVar(&agentHost, "agent-host", "", "callback host for this agent (e.g. http://192.168.1.20:9999)")
+	cmd.Flags().StringVar(&agentHost, "agent-host", "", "callback host for this agent (e.g. http://192.168.1.60:6601)")
 	cmd.Flags().StringVar(&agentID, "agent-id", "", "unique id for this agent (e.g. agent-1)")
 	cmd.Flags().BoolVar(&loopTestSession, "loop-test-session", false, "if set to true, the agent runs indefinitely until the service is terminated. If false, it terminates after the test completes")
 

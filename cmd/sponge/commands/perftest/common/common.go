@@ -20,6 +20,15 @@ const (
 	BodyTypeText = "text/plain"
 )
 
+var CommandPrefix = "sponge perftest"
+
+// SetCommandPrefix sets the command prefix for the perftest command.
+func SetCommandPrefix(name string) {
+	if name == "" || name == "perftest" {
+		CommandPrefix = "perftest"
+	}
+}
+
 // nolint
 func ParseHTTPParams(method string, headers []string, body string, bodyFile string) ([]byte, map[string]string, error) {
 	var bodyType string

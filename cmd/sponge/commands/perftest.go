@@ -12,8 +12,8 @@ func PerftestCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "perftest",
 		Short: "Performance testing for HTTP/1.1, HTTP/2, HTTP/3, and websocket",
-		Long: `Perftest is a performance testing tool that supports HTTP/1.1, HTTP/2, HTTP/3, and WebSocket protocols.
-It also allows real-time statistics to be pushed to a custom HTTP server or Prometheus.`,
+		Long: `Perftest is a performance testing tool that supports HTTP/1.1, HTTP/2, HTTP/3, and WebSocket protocols. It also allows real-time statistics
+to be pushed to a custom HTTP endpoints or Prometheus, and supports two testing modes: standalone and distributed cluster testing.`,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
@@ -23,6 +23,9 @@ It also allows real-time statistics to be pushed to a custom HTTP server or Prom
 		http.PerfTestHTTP2CMD(),
 		http.PerfTestHTTP3CMD(),
 		websocket.PerfTestWebsocketCMD(),
+
+		http.PerfTestCollectorCMD(),
+		http.PerfTestAgentCMD(),
 	)
 
 	return cmd

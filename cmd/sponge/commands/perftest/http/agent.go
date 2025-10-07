@@ -15,7 +15,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -29,26 +28,34 @@ import (
 
 // PerfTestAgentCMD is the command for performance testing agent
 func PerfTestAgentCMD() *cobra.Command {
-	var yamlFile string
-	var podIP string
+	var (
+		yamlFile string
+		agentIP  string
+		agentID  string
+	)
 
 	cmd := &cobra.Command{
 		Use:   "agent",
-		Short: "Run an agent to test APIs (supports HTTP/1.1, HTTP/2, and HTTP/3), used in distributed cluster testing",
-		Long:  "Run an agent to test APIs (supports HTTP/1.1, HTTP/2, and HTTP/3, used in distributed cluster testing.",
+		Short: "Run an agent for API testing (supports HTTP/1.1, HTTP/2, and HTTP/3). Used in distributed cluster mode",
+		Long: "Run an agent process to execute API performance tests. The agent supports HTTP/1.1, HTTP/2, and HTTP/3 protocols, " +
+			"and is designed to work as part of a distributed cluster managed by the collector service.",
 		Example: color.HiBlackString(`  # Running agent
-  sponge perftest agent --config=/path/to/agent.yml`),
+  %s agent --config=/path/to/agent.yml`, common.CommandPrefix),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			quitChan := make(chan os.Signal, 1)
 			signal.Notify(quitChan, syscall.SIGINT, syscall.SIGTERM)
 
+			if agentID == "" {
+				agentID = "aid_" + krand.String(krand.R_All, 10)
+			}
+
 			config := &agentConfig{}
 
 			// define the core logic for restarting services
 			restartService := func(cfg *agentConfig) {
-				if err := cfg.validate(); err != nil {
+				if err := cfg.validate(agentID, agentIP); err != nil {
 					log.Printf("new configuration is invalid, service will not be started: %v", err)
 					return
 				}
@@ -60,9 +67,6 @@ func PerfTestAgentCMD() *cobra.Command {
 				manager.mu.Lock()
 				manager.currentCfg = &currentCfg
 				manager.cancel = cancel
-				if podIP != "" {
-					manager.currentCfg.AgentHost = fmt.Sprintf("http://%s:%d", podIP, 6601) // default port 6601
-				}
 				manager.mu.Unlock()
 
 				configBytes, _ := json.Marshal(cfg)
@@ -79,11 +83,17 @@ func PerfTestAgentCMD() *cobra.Command {
 			onConfigChange := func() {
 				log.Println("configuration file change detected.")
 
-				manager.mu.Lock()
 				newCfg := *config
+				newCfgPtr := &newCfg
+				if err := newCfgPtr.validate(agentID, agentIP); err != nil {
+					log.Printf("new configuration is invalid, agent will not be started: %v", err)
+					return
+				}
+
+				manager.mu.Lock()
 
 				// compare with the current running configuration
-				if manager.currentCfg != nil && reflect.DeepEqual(*manager.currentCfg, newCfg) {
+				if manager.currentCfg != nil && reflect.DeepEqual(manager.currentCfg, newCfgPtr) {
 					log.Println("configuration content is identical, no restart needed.")
 					manager.mu.Unlock()
 					return
@@ -97,7 +107,7 @@ func PerfTestAgentCMD() *cobra.Command {
 				manager.mu.Unlock()
 
 				// start the service in the new goroutine
-				go restartService(&newCfg)
+				go restartService(newCfgPtr)
 			}
 
 			// parse YAML file and set listening callbacks
@@ -130,7 +140,8 @@ func PerfTestAgentCMD() *cobra.Command {
 
 	cmd.Flags().StringVarP(&yamlFile, "config", "c", "", "yaml config file path")
 	_ = cmd.MarkFlagRequired("config")
-	cmd.Flags().StringVarP(&podIP, "pod-ip", "p", "", "pod IP address, use in deployment in kubernetes")
+	cmd.Flags().StringVarP(&agentIP, "agent-ip", "i", "", "agent ip address, the IP addresses of each agent in the cluster cannot be duplicated")
+	cmd.Flags().StringVarP(&agentID, "agent-id", "n", "", "agent ID, unique identifier of the agent")
 
 	return cmd
 }
@@ -177,14 +188,31 @@ type agentConfig struct {
 	LoopTestSession *bool   `yaml:"loopTestSession"` // default true
 }
 
-func (a *agentConfig) validate() error { //nolint
+func (a *agentConfig) validate(agentID, agentIP string) error { //nolint
+	if agentID != "" {
+		a.AgentID = &agentID
+	}
+	var agentHost = a.AgentHost
+	if agentIP != "" {
+		agentHost = fmt.Sprintf("http://%s:%d", agentIP, 6601) // default port 6601
+	} else {
+		if agentHost == "" {
+			agentHost = "http://localhost:6601"
+		}
+	}
+	newAgentHost, _, err := adaptAgentHost(agentHost)
+	if err != nil {
+		return err
+	}
+	a.AgentHost = newAgentHost
+
 	if a.Protocol != protocolHTTP && a.Protocol != protocolHTTP2 && a.Protocol != protocolHTTP3 {
 		return fmt.Errorf("invalid 'protocol', only http, http2, http3 are supported")
 	}
 	if a.TestURL == "" {
 		return fmt.Errorf("invalid 'url', required")
 	}
-	_, err := url.Parse(a.TestURL)
+	_, err = url.Parse(a.TestURL)
 	if err != nil {
 		return fmt.Errorf("invalid 'url', %v", err)
 	}
@@ -202,8 +230,7 @@ func (a *agentConfig) validate() error { //nolint
 	}
 
 	if a.AgentID == nil || *a.AgentID == "" {
-		agentID := "aid_" + krand.String(krand.R_All, 10)
-		a.AgentID = &agentID
+		return fmt.Errorf("invalid 'agentID', required")
 	}
 
 	if a.LoopTestSession == nil {
@@ -354,29 +381,11 @@ func NewAgent(id, collectorHost, agentHost, testURL, testMethod string) (*Agent,
 		return nil, fmt.Errorf("invalid 'collector-host' URL scheme, only http and https are supported")
 	}
 
-	var listenerPort string
-	if agentHost == "" {
-		return nil, fmt.Errorf("invalid agent configuration, 'agent-host' is required")
-	}
-	u, err = url.Parse(agentHost)
+	newAgentHost, listenerPort, err := adaptAgentHost(agentHost)
 	if err != nil {
-		return nil, fmt.Errorf("invalid 'agent-host' URL: %v, e.g. http://192.168.1.20:9999", err)
+		return nil, err
 	}
-	if u.Scheme != protocolHTTP && u.Scheme != protocolHTTPS {
-		return nil, fmt.Errorf("invalid 'agent-host' URL scheme, only http and https are supported")
-	}
-	newAgentHost := strings.TrimSuffix(agentHost, u.Port())
-	listenerPort = common.CheckPortInUse(u.Port())
-	if listenerPort == "" {
-		switch u.Scheme {
-		case protocolHTTP:
-			listenerPort = "80"
-		case protocolHTTPS:
-			listenerPort = "443"
-		}
-	} else {
-		newAgentHost += listenerPort
-	}
+	u, _ = url.Parse(newAgentHost)
 	host := strings.TrimSuffix(u.Host, ":"+u.Port())
 	switch host {
 	case "localhost", "127.0.0.1", "::1", "[::1]", "0.0.0.0":
@@ -438,8 +447,15 @@ func (a *Agent) Run(ctx context.Context, loop bool) error { //nolint
 	}()
 
 	// 2. register to collector until successful
+	registerTimer := time.NewTimer(5 * time.Second)
+	defer registerTimer.Stop()
+	isFirst := true
 LOOP:
-	ticker := time.NewTicker(5 * time.Second)
+	if !isFirst {
+		isFirst = false
+		registerTimer.Reset(5 * time.Second)
+		<-registerTimer.C
+	}
 	var lastErrMsg string
 	var testID string
 	var err error
@@ -447,7 +463,6 @@ LOOP:
 		// check if the external context has been canceled
 		select {
 		case <-ctx.Done():
-			ticker.Stop()
 			return context.Canceled
 		default:
 		}
@@ -469,56 +484,56 @@ LOOP:
 			lastErrMsg = errMsg
 		}
 
+		registerTimer.Reset(5 * time.Second)
 		select {
-		case <-ticker.C:
+		case <-registerTimer.C:
 			continue
 		case <-ctx.Done():
-			ticker.Stop()
 			return context.Canceled
 		}
 	}
-	ticker.Stop()
 
-	var runStatus int32
 	pingCtx, pingCancel := context.WithCancel(context.Background())
 	pingCancelFn := func() {
+		if pingCtx.Err() != nil {
+			return
+		}
 		pingCancel()
 	}
 	go func(runCtx context.Context, agentCancel context.CancelFunc) {
 		a.mu.Lock()
 		pingURL := fmt.Sprintf("%s/ping/%s?agent_id=%s", a.CollectorHost, testID, a.ID)
 		a.mu.Unlock()
-		pingTicker := time.NewTicker(5 * time.Second)
-		defer pingTicker.Stop()
+		pingTimer := time.NewTimer(5 * time.Second)
+		defer pingTimer.Stop()
 		for {
+			pingTimer.Reset(5 * time.Second)
 			select {
 			case <-runCtx.Done():
 				return
 			case <-pingCtx.Done():
 				return
-			case <-pingTicker.C:
-				if atomic.LoadInt32(&runStatus) == 1 { // agent is running, no need to ping
-					return
-				}
-				client := &http.Client{Timeout: 3 * time.Second}
-				resp, err := client.Post(pingURL, "application/json", nil) //nolint
+			case <-pingTimer.C:
 				pingSuccess := true
-				var status int
+				errStr := ""
+				client := &http.Client{Timeout: 3 * time.Second}
+				req, _ := http.NewRequestWithContext(pingCtx, "POST", pingURL, nil)
+				req.Header.Set("Content-Type", "application/json")
+				resp, err := client.Do(req) //nolint
 				if err != nil {
+					errStr = err.Error()
 					pingSuccess = false
 				} else {
-					status = resp.StatusCode
 					if resp.StatusCode != http.StatusOK {
 						pingSuccess = false
+						errStr = readBody(resp.Body)
 					}
 					_ = resp.Body.Close()
 				}
-				if atomic.LoadInt32(&runStatus) == 1 { // agent is running, no need to ping
-					return
-				}
+
 				if !pingSuccess {
 					agentCancel()
-					log.Printf("[testID: %s] collector ping failed, status code: %d\n", testID, status)
+					log.Printf("[testID: %s] collector ping failed, error: %s\n", testID, errStr)
 					return
 				}
 			}
@@ -528,12 +543,11 @@ LOOP:
 	// 3. waiting for start signal or context cancellation
 	select {
 	case newTestID := <-a.startSignal:
-		atomic.StoreInt32(&runStatus, 1)
+		pingCancelFn()
 		if newTestID != testID {
 			log.Printf("received start signal for test session (%s), but agent is already running test session (%s), dropping signal\n", newTestID, testID)
 			break
 		}
-		pingCancelFn()
 		log.Printf("[testID: %s] beginning performance test\n", testID)
 		err = a.runPerformanceTestFn(a.testCtx, testID)
 		if err != nil {
@@ -542,9 +556,10 @@ LOOP:
 		}
 		log.Printf("[testID: %s] performance test finished\n\n", testID)
 	case <-a.testCtx.Done(): // internal testing context canceled
-		atomic.StoreInt32(&runStatus, 1)
+		pingCancelFn()
+
 	case <-ctx.Done(): // external (primary) context canceled
-		atomic.StoreInt32(&runStatus, 1)
+		pingCancelFn()
 		return context.Canceled
 	}
 
@@ -569,6 +584,7 @@ func (a *Agent) registerWithCollector() (string, error) {
 		Callback: a.AgentHost,
 		URL:      a.TestURL,
 		Method:   a.TestMethod,
+		Status:   AgentStatusRegistered,
 	}
 
 	body, err := json.Marshal(agentInfo)
@@ -586,15 +602,7 @@ func (a *Agent) registerWithCollector() (string, error) {
 	defer resp.Body.Close() //nolint
 
 	if resp.StatusCode != http.StatusOK {
-		respBody, _ := io.ReadAll(resp.Body)
-		var errorResp struct {
-			Error string `json:"error"`
-		}
-		errStr := string(respBody)
-		err = json.Unmarshal(respBody, &errorResp)
-		if err == nil {
-			errStr = errorResp.Error
-		}
+		errStr := readBody(resp.Body)
 		return "", fmt.Errorf("registration failed, %s", errStr)
 	}
 
@@ -620,7 +628,20 @@ func (a *Agent) startListener() error {
 	mux.HandleFunc("/cancel", a.handleCancel)
 	mux.HandleFunc("/ping", a.handlePing)
 
-	a.httpServer = &http.Server{Addr: ":" + a.listenerPort, Handler: mux}
+	// pprof routers
+	//mux.HandleFunc("/debug/pprof/", pprof.Index)
+	//mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	//mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	//mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	//mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	a.httpServer = &http.Server{
+		Addr:         ":" + a.listenerPort,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  30 * time.Second,
+	}
 	err := a.httpServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		return err
@@ -791,4 +812,45 @@ func getAndCheckID(r *http.Request, currentTestID string, currentAgentID string)
 		return fmt.Errorf("invalid agent_id, expected: '%s', actual: '%s'", currentAgentID, agentID)
 	}
 	return nil
+}
+
+func adaptAgentHost(agentHost string) (newAgentHost string, listenerPort string, err error) {
+	if agentHost == "" {
+		return "", "", fmt.Errorf("invalid agent configuration, 'agent-host' is required")
+	}
+	u, err := url.Parse(agentHost)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid 'agent-host' URL: %v, e.g. http://192.168.1.60:6601", err)
+	}
+	if u.Scheme != protocolHTTP && u.Scheme != protocolHTTPS {
+		return "", "", fmt.Errorf("invalid 'agent-host' URL scheme, only http and https are supported")
+	}
+	newAgentHost = strings.TrimSuffix(agentHost, u.Port())
+	listenerPort = common.CheckPortInUse(u.Port())
+	if listenerPort == "" {
+		switch u.Scheme {
+		case protocolHTTP:
+			listenerPort = "80"
+		case protocolHTTPS:
+			listenerPort = "443"
+		}
+	} else {
+		newAgentHost += listenerPort
+	}
+	return newAgentHost, listenerPort, nil
+}
+
+var errorResp struct {
+	Error string `json:"error"`
+}
+
+func readBody(r io.Reader) string {
+	respBody, _ := io.ReadAll(r)
+
+	errStr := string(respBody)
+	err := json.Unmarshal(respBody, &errorResp)
+	if err == nil {
+		errStr = errorResp.Error
+	}
+	return errStr
 }
