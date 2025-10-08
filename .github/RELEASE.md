@@ -2,9 +2,11 @@
 ## Changelog
 
 ### New Features
-1**Enhanced AI assistant’s ability to generate business code**: Improved contextual understanding to increase the accuracy and practicality of generated code.
-2**Added a lightweight, high-performance stress testing command**: Supports HTTP/1.1, HTTP/2, HTTP/3, and WebSocket protocols, with the capability to push stress test data in real time to Prometheus or custom services.
-3**Supports running performance stress tests via the UI**: Provides visualized test reports for real-time viewing and analysis of results.
+
+1. **Distributed Load Testing in Perftest**: Added distributed testing mode with real-time performance metrics visualization on the dashboard, enabling large-scale load testing.
+2. **Gin Session Usage Tips**: Added guidance for using sessions in the Gin framework, making integration easier for developers.
 
 ### Bug Fixes
-- Fixed a bug caused by the lack of support for fuzzy queries with Chinese prefixes and suffixes. For details, see [#130](https://github.com/go-dev-frame/sponge/pull/130).
+
+1. **SQL Code Generation Fix**: Fixed an issue where SQL-to-code generation failed when SQL comments contained line breaks.
+2. **SSE Client Release Fix**: Fixed an issue where the SSE server didn’t properly release connected clients upon shutdown. [#136](https://github.com/go-dev-frame/sponge/issues/136)
