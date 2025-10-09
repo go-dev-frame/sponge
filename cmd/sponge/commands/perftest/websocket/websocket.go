@@ -149,9 +149,8 @@ func (p *perfTestParams) run() error {
 			break
 		}
 
-		wg.Add(1)
 		client := NewClient(i+1, p.targetURL, stats, p.sendInterval, p.payloadData, p.isJSON)
-		go client.Run(mainCtx, &wg)
+		wg.Go(func() { client.Run(mainCtx) })
 
 		if rampUpDelay > 0 {
 			time.Sleep(rampUpDelay)
