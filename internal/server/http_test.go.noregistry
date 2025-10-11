@@ -1,0 +1,87 @@
+package server
+
+import (
+	"encoding/base64"
+	"net/http"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/acme"
+
+	"github.com/go-dev-frame/sponge/internal/config"
+)
+
+func setTestConfig(t *testing.T, httpCfg config.HTTP) {
+	t.Helper()
+	config.Set(&config.Config{
+		App: config.App{
+			Env: "dev",
+		},
+		HTTP: httpCfg,
+	})
+	t.Cleanup(func() {
+		config.Set(nil)
+	})
+}
+
+func TestSecondsToDuration(t *testing.T) {
+	require.Equal(t, time.Duration(0), secondsToDuration(0))
+	require.Equal(t, time.Duration(0), secondsToDuration(-1))
+	require.Equal(t, 30*time.Second, secondsToDuration(30))
+}
+
+func TestFilterDomains(t *testing.T) {
+	input := []string{"example.com", "", "  other.example.com  "}
+	result := filterDomains(input)
+	require.Equal(t, []string{"example.com", "other.example.com"}, result)
+}
+
+func TestExternalAccountBinding(t *testing.T) {
+	// returns nil when kid or key missing
+	require.Nil(t, externalAccountBinding(config.Eab{}))
+
+	key := []byte("secret")
+	encoded := base64.RawURLEncoding.EncodeToString(key)
+	binding := externalAccountBinding(config.Eab{Kid: "kid", HmacKey: encoded})
+	require.NotNil(t, binding)
+	require.Equal(t, "kid", binding.KID)
+	require.Equal(t, key, binding.Key)
+}
+
+func TestNewHTTPServer_TLSEnabled(t *testing.T) {
+	httpCfg := config.HTTP{
+		Port:         8080,
+		HTTPSPort:    8443,
+		IdleTimeout:  10,
+		ReadTimeout:  5,
+		WriteTimeout: 5,
+		TLS: config.TLS{
+			Domains:       []string{"example.com"},
+			AcmeDirectory: acme.LetsEncryptURL,
+			StoragePath:   t.TempDir(),
+		},
+	}
+
+	setTestConfig(t, httpCfg)
+	server := NewHTTPServer(httpCfg, WithHTTPHandler(http.NewServeMux())).(*httpServer)
+	require.True(t, server.tlsEnabled)
+	require.NotNil(t, server.httpsServer)
+	require.Equal(t, ":8080", server.httpAddr)
+	require.Equal(t, ":8443", server.httpsServer.Addr)
+}
+
+func TestNewHTTPServer_TLSDisabledWhenNoDomains(t *testing.T) {
+	httpCfg := config.HTTP{
+		Port:      8080,
+		HTTPSPort: 8443,
+		TLS: config.TLS{
+			Domains: []string{"", "   "},
+		},
+	}
+
+	setTestConfig(t, httpCfg)
+	server := NewHTTPServer(httpCfg, WithHTTPHandler(http.NewServeMux())).(*httpServer)
+	require.False(t, server.tlsEnabled)
+	require.Nil(t, server.httpsServer)
+}
