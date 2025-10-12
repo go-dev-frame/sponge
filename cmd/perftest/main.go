@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/go-dev-frame/sponge/cmd/sponge/commands/perftest/common"
+	"github.com/go-dev-frame/sponge/cmd/sponge/commands/perftest/grpc"
 	"github.com/go-dev-frame/sponge/cmd/sponge/commands/perftest/http"
 	"github.com/go-dev-frame/sponge/cmd/sponge/commands/perftest/websocket"
 )
@@ -22,8 +23,8 @@ func perftestCommand() *cobra.Command {
 	common.SetCommandPrefix("perftest")
 	cmd := &cobra.Command{
 		Use:   "perftest",
-		Short: "Performance testing for HTTP/1.1, HTTP/2, HTTP/3, and websocket",
-		Long: `Perftest is a high-performance testing tool that supports HTTP/1.1, HTTP/2, HTTP/3, and WebSocket protocols.  
+		Short: "Performance testing for HTTP/1.1, HTTP/2, HTTP/3, WebSocket and gRPC",
+		Long: `Perftest is a high-performance testing tool that supports HTTP/1.1, HTTP/2, HTTP/3, WebSocket and gRPC protocols.  
 It provides real-time metrics reporting to custom HTTP endpoints or Prometheus, and supports two modes:  
 standalone testing and distributed cluster testing.`,
 		SilenceErrors: true,
@@ -35,6 +36,7 @@ standalone testing and distributed cluster testing.`,
 		http.PerfTestHTTP2CMD(),
 		http.PerfTestHTTP3CMD(),
 		websocket.PerfTestWebsocketCMD(),
+		grpc.PerfTestGRPCCMD(),
 
 		http.PerfTestCollectorCMD(),
 		http.PerfTestAgentCMD(),
