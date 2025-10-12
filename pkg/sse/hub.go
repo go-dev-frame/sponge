@@ -371,19 +371,36 @@ func (h *Hub) OnlineClientsNum() int {
 	return h.clients.Len()
 }
 
-// Close event center and stop all worker
-func (h *Hub) Close() {
+// Close event center and stop all worker,
+// By default, send a shutdown event to the client. If you want the client
+// to automatically reconnect, please set the tryToReconnect parameter to false.
+func (h *Hub) Close(tryToReconnect ...bool) {
 	if h.OnlineClientsNum() > 0 {
 		h.zapLogger.Info("[sse] closing clients", zap.Int("client_num", h.OnlineClientsNum()))
-	}
-	h.clients.Range(func(uidKey, cliVal interface{}) bool {
-		cli := cliVal.(*UserClient)
-		if h.clients.Has(cli.UID) {
-			h.clients.Delete(cli.UID)
-			close(cli.Send)
+
+		noTryToReconnect := false
+		if len(tryToReconnect) == 0 || tryToReconnect[0] {
+			_ = h.Push(nil, CloseEvent())
+			noTryToReconnect = true
 		}
-		return true
-	})
+
+		if noTryToReconnect {
+			for i := 0; i < 50; i++ {
+				time.Sleep(100 * time.Millisecond)
+				h.clients.Range(func(uidKey, cliVal interface{}) bool {
+					cli := cliVal.(*UserClient)
+					if cli.isSendClosedEvent && h.clients.Has(cli.UID) {
+						h.clients.Delete(cli.UID)
+						close(cli.Send)
+					}
+					return true
+				})
+				if h.OnlineClientsNum() == 0 {
+					break
+				}
+			}
+		}
+	}
 
 	h.cancel()
 	h.asyncTaskPool.Wait()
@@ -430,5 +447,5 @@ func (s *PushStats) Snapshot() (total, success, failed, timeout int64) { //nolin
 
 func newStringID() string {
 	ns := time.Now().UnixMicro() * 1000
-	return strconv.FormatInt(ns+rand.Int63n(1000), 10)
+	return strconv.FormatInt(ns+rand.Int63n(1000), 16)
 }

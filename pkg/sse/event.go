@@ -26,6 +26,14 @@ func (e *Event) CheckValid() error {
 	return nil
 }
 
+// CloseEvent returns a close event
+func CloseEvent() *Event {
+	return &Event{
+		Event: "close",
+		Data:  "server closed connection, do not retry",
+	}
+}
+
 // Store defines the interface for storing and retrieving events
 type Store interface {
 	Save(ctx context.Context, e *Event) error

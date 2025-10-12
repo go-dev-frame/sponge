@@ -23,7 +23,7 @@ type clientOptions struct {
 func defaultClientOptions() *clientOptions {
 	logger, _ := zap.NewProduction()
 	return &clientOptions{
-		reconnectTimeInterval: 5 * time.Second,
+		reconnectTimeInterval: 2 * time.Second,
 		zapLogger:             logger,
 	}
 }
@@ -74,7 +74,7 @@ type SSEClient struct {
 
 	headers   map[string]string
 	zapLogger *zap.Logger
-	// initial time interval of reconnection, default is 3 seconds
+	// default is 2 seconds, backoff time interval will double after each retry
 	reconnectTimeInterval time.Duration
 }
 
@@ -143,13 +143,13 @@ func (c *SSEClient) setConnectStatus(st bool) {
 	c.mu.Unlock()
 }
 
-// support auto reconnect, retry strategy, exponential backoff algorithm, max retries is 10, max backoff is 30 seconds
+// support auto reconnect, retry strategy, exponential backoff algorithm, max retries is 5 times, max backoff is 30 seconds
 func (c *SSEClient) connectServer() {
 	s := &retryStrategy{
 		backoff:    c.reconnectTimeInterval,
 		maxBackoff: 30 * time.Second,
 		retryCount: 0,
-		maxRetries: 10,
+		maxRetries: 5,
 	}
 	c.setConnectStatus(true)
 
@@ -242,6 +242,11 @@ func (c *SSEClient) stream(s *retryStrategy) error {
 		} else if strings.HasPrefix(line, "data:") {
 			data = strings.TrimSpace(line[5:])
 			eventData = append(eventData, data)
+		}
+
+		if eventType == "close" {
+			c.Disconnect()
+			return fmt.Errorf("close event received")
 		}
 
 		select {

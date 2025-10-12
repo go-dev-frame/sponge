@@ -172,6 +172,8 @@ type UserClient struct {
 	Send    chan *Event
 	writer  http.ResponseWriter
 	flusher http.Flusher
+
+	isSendClosedEvent bool
 }
 
 func (c *UserClient) sendEvent(e *Event) error {
@@ -188,6 +190,10 @@ func (c *UserClient) sendEvent(e *Event) error {
 	}
 	buf.Write(data)
 	buf.WriteString("\n\n")
+
+	if e.Event == "close" {
+		c.isSendClosedEvent = true
+	}
 
 	return c.write(buf.Bytes())
 }
