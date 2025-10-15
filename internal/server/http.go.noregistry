@@ -2,45 +2,102 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/go-dev-frame/sponge/pkg/app"
+	"github.com/go-dev-frame/sponge/pkg/logger"
 
+	"github.com/go-dev-frame/sponge/internal/config"
 	"github.com/go-dev-frame/sponge/internal/routers"
 )
 
 var _ app.IServer = (*httpServer)(nil)
 
 type httpServer struct {
-	addr   string
-	server *http.Server
+	httpAddr    string
+	httpsAddr   string
+	httpServer  *http.Server
+	httpsServer *http.Server
+	tlsEnabled  bool
 }
 
-// Start http service
+// Start http/https service
 func (s *httpServer) Start() error {
-	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		return fmt.Errorf("listen server error: %v", err)
+	if s.tlsEnabled {
+		errCh := make(chan error, 2)
+
+		go func() {
+			errCh <- listenAndServe(s.httpServer)
+		}()
+
+		go func() {
+			errCh <- listenAndServeTLS(s.httpsServer)
+		}()
+
+		var firstErr error
+		for i := 0; i < 2; i++ {
+			if err := <-errCh; err != nil {
+				if firstErr == nil {
+					firstErr = err
+				} else {
+					logger.Error("http server encountered multiple errors", logger.Err(err))
+				}
+			}
+		}
+
+		return firstErr
 	}
+
+	if err := listenAndServe(s.httpServer); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// Stop http service
+// Stop http/https service
 func (s *httpServer) Stop() error {
-	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second) //nolint
-	return s.server.Shutdown(ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var firstErr error
+	if err := s.httpServer.Shutdown(ctx); err != nil {
+		firstErr = err
+	}
+
+	if s.tlsEnabled && s.httpsServer != nil {
+		if err := s.httpsServer.Shutdown(ctx); err != nil && !errors.Is(err, context.Canceled) {
+			if firstErr == nil {
+				firstErr = err
+			} else {
+				logger.Error("https server shutdown reported additional error", logger.Err(err))
+			}
+		}
+	}
+
+	return firstErr
 }
 
-// String comment
+// String provides a human readable description of listener addresses.
 func (s *httpServer) String() string {
-	return "http service address " + s.addr
+	if s.tlsEnabled {
+		return fmt.Sprintf("http service redirecting on %s and https service address %s", s.httpAddr, s.httpsAddr)
+	}
+	return "http service address " + s.httpAddr
 }
 
-// NewHTTPServer creates a new http server
-func NewHTTPServer(addr string, opts ...HTTPOption) app.IServer {
+// NewHTTPServer creates an HTTP server with optional automatic TLS.
+func NewHTTPServer(cfg config.HTTP, opts ...HTTPOption) app.IServer {
 	o := defaultHTTPOptions()
 	o.apply(opts...)
 
@@ -50,16 +107,57 @@ func NewHTTPServer(addr string, opts ...HTTPOption) app.IServer {
 		gin.SetMode(gin.DebugMode)
 	}
 
-	router := routers.NewRouter()
-	server := &http.Server{
-		Addr:           addr,
-		Handler:        router,
+	appHandler := o.handler
+	if appHandler == nil {
+		appHandler = routers.NewRouter()
+	}
+
+	readTimeout := secondsToDuration(cfg.ReadTimeout)
+	writeTimeout := secondsToDuration(cfg.WriteTimeout)
+	idleTimeout := secondsToDuration(cfg.IdleTimeout)
+
+	httpSrv := &http.Server{
+		Addr:           fmt.Sprintf(":%d", cfg.Port),
+		Handler:        appHandler,
+		ReadTimeout:    readTimeout,
+		WriteTimeout:   writeTimeout,
+		IdleTimeout:    idleTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 
+	domains := filterDomains(cfg.TLS.Domains)
+	tlsEnabled := len(domains) > 0
+
+	var (
+		httpsSrv  *http.Server
+		httpsAddr string
+	)
+	if tlsEnabled {
+		manager := buildAutocertManager(cfg, domains)
+		httpSrv.Handler = manager.HTTPHandler(http.HandlerFunc(httpRedirectHandler))
+
+		httpsSrv = &http.Server{
+			Addr:           fmt.Sprintf(":%d", cfg.HTTPSPort),
+			Handler:        appHandler,
+			ReadTimeout:    readTimeout,
+			WriteTimeout:   writeTimeout,
+			IdleTimeout:    idleTimeout,
+			MaxHeaderBytes: 1 << 20,
+			TLSConfig:      manager.TLSConfig(),
+		}
+		httpsAddr = httpsSrv.Addr
+
+		logger.Info("automatic TLS enabled", logger.String("http_addr", httpSrv.Addr), logger.String("https_addr", httpsSrv.Addr), logger.Any("domains", domains))
+	} else {
+		logger.Info("automatic TLS disabled", logger.String("http_addr", httpSrv.Addr))
+	}
+
 	return &httpServer{
-		addr:   addr,
-		server: server,
+		httpAddr:    httpSrv.Addr,
+		httpsAddr:   httpsAddr,
+		httpServer:  httpSrv,
+		httpsServer: httpsSrv,
+		tlsEnabled:  tlsEnabled,
 	}
 }
 

@@ -1024,6 +1024,10 @@ func getHTTPServiceFields() []replacer.Field {
 			New: "",
 		},
 		{
+			Old: "http_test.go.noregistry",
+			New: "http_test.go",
+		},
+		{
 			Old: "http.go.noregistry",
 			New: "http.go",
 		},
