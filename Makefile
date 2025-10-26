@@ -101,9 +101,10 @@ run:
 
 
 .PHONY: run-nohup
-# Run service with nohup in local, you can specify the configuration file, e.g. make run-nohup Config=configs/dev.yml, if you want to stop the server, pass the parameter stop, e.g. make run-nohup CMD=stop
+# Run service with nohup in local, e.g. make run-nohup CMD=start, you can specify the configuration file, e.g. make run-nohup CMD=start Config=configs/dev.yml, if you want to stop the service, e.g. make run-nohup CMD=stop
+CMD ?= start
 run-nohup:
-	@bash scripts/run-nohup.sh $(Config) $(CMD)
+	@bash scripts/run-nohup.sh $(CMD) $(Config)
 
 
 .PHONY: run-docker
