@@ -43,7 +43,7 @@ func OpenUICommand() *cobra.Command {
 					return err
 				}
 			}
-			fmt.Printf("The code generation engine service is already running, version = %s, access the url %s in your browser.\n",
+			fmt.Printf("Code generation engine service running %s. Access %s in your browser.\n",
 				getVersion(), color.HiCyanString(spongeAddr))
 			go func() {
 				_ = open(spongeAddr)
