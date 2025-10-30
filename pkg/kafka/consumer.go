@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"time"
 
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
@@ -51,6 +52,40 @@ func InitConsumerGroup(addrs []string, groupID string, opts ...ConsumerOption) (
 	}, nil
 }
 
+// ConsumeLoop consume messages in a loop, with rebalanced handling
+func (c *ConsumerGroup) ConsumeLoop(ctx context.Context, topics []string, handleMessageFn HandleMessageFn) {
+	backoff := time.Second
+	maxBackoff := 30 * time.Second
+
+	for {
+		err := c.Consume(ctx, topics, handleMessageFn)
+		if err != nil {
+			select {
+			case <-time.After(backoff):
+			case <-ctx.Done():
+				return
+			}
+
+			if backoff < maxBackoff {
+				backoff *= 2
+				if backoff > maxBackoff {
+					backoff = maxBackoff
+				}
+			}
+			continue
+		}
+
+		// Normal exit (mostly due to rebalanced), should reset the backoff and wait for the next time to join the consumption group
+		backoff = time.Second
+
+		if ctx.Err() != nil {
+			return
+		}
+
+		c.zapLogger.Info("rebalanced, starting new session", zap.String("group_id", c.groupID), zap.Strings("topics", topics))
+	}
+}
+
 // Consume consume messages
 func (c *ConsumerGroup) Consume(ctx context.Context, topics []string, handleMessageFn HandleMessageFn) error {
 	handler := &defaultConsumerHandler{
@@ -68,11 +103,45 @@ func (c *ConsumerGroup) Consume(ctx context.Context, topics []string, handleMess
 	return nil
 }
 
+// ConsumeCustomLoop consume messages for custom handler in a loop, with rebalanced handling
+func (c *ConsumerGroup) ConsumeCustomLoop(ctx context.Context, topics []string, handler sarama.ConsumerGroupHandler) {
+	backoff := time.Second
+	maxBackoff := 30 * time.Second
+
+	for {
+		err := c.ConsumeCustom(ctx, topics, handler)
+		if err != nil {
+			select {
+			case <-time.After(backoff):
+			case <-ctx.Done():
+				return
+			}
+
+			if backoff < maxBackoff {
+				backoff *= 2
+				if backoff > maxBackoff {
+					backoff = maxBackoff
+				}
+			}
+			continue
+		}
+
+		// Normal exit (mostly due to rebalanced), should reset the backoff and wait for the next time to join the consumption group
+		backoff = time.Second
+
+		if ctx.Err() != nil {
+			return
+		}
+
+		c.zapLogger.Info("rebalanced, starting new session", zap.String("group_id", c.groupID), zap.Strings("topics", topics))
+	}
+}
+
 // ConsumeCustom consume messages for custom handler, you need to implement the sarama.ConsumerGroupHandler interface
 func (c *ConsumerGroup) ConsumeCustom(ctx context.Context, topics []string, handler sarama.ConsumerGroupHandler) error {
 	err := c.Group.Consume(ctx, topics, handler)
 	if err != nil {
-		c.zapLogger.Error("failed to consume messages", zap.String("group_id", c.groupID), zap.Strings("topics", topics), zap.Error(err))
+		c.zapLogger.Error("failed to consume custom messages", zap.String("group_id", c.groupID), zap.Strings("topics", topics), zap.Error(err))
 		return err
 	}
 	return nil
@@ -192,11 +261,11 @@ func (c *Consumer) ConsumePartition(ctx context.Context, topic string, partition
 	for {
 		select {
 		case msg := <-pc.Messages():
-			err := handleFn(msg)
+			err = handleFn(msg)
 			if err != nil {
 				c.zapLogger.Warn("failed to handle message", zap.Error(err), zap.String("topic", topic), zap.Int32("partition", partition), zap.Int64("offset", msg.Offset))
 			}
-		case err := <-pc.Errors():
+		case err = <-pc.Errors():
 			c.zapLogger.Error("partition consumer error", zap.Error(err))
 		case <-ctx.Done():
 			return
