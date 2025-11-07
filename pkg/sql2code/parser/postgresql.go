@@ -80,7 +80,7 @@ func (field *PGField) getMysqlType() string {
 		}
 	case "text":
 		return "text"
-	case "timestamp":
+	case "timestamp", "timestamptz":
 		return "timestamp"
 	case "date":
 		return "date"
