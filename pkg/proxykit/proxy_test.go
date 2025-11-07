@@ -76,8 +76,8 @@ func TestProxy_ServeHTTP(t *testing.T) {
 		if rr.Code != http.StatusServiceUnavailable {
 			t.Errorf("expected status %d, got %d", http.StatusServiceUnavailable, rr.Code)
 		}
-		if !strings.Contains(rr.Body.String(), "Service not available") {
-			t.Errorf("expected body 'Service not available', got '%s'", rr.Body.String())
+		if !strings.Contains(rr.Body.String(), "service not available") {
+			t.Errorf("expected body 'service not available', got '%s'", rr.Body.String())
 		}
 	})
 
@@ -117,8 +117,8 @@ func TestProxy_ServeHTTP(t *testing.T) {
 		if rr.Code != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, rr.Code)
 		}
-		if body := rr.Body.String(); body != "Hello from backend" {
-			t.Errorf("expected body 'Hello from backend', got '%s'", body)
+		if body := rr.Body.String(); body != "hello from backend" {
+			t.Errorf("expected body 'hello from backend', got '%s'", body)
 		}
 		if header := rr.Header().Get("X-Backend-Header"); header != "backend-value" {
 			t.Errorf("expected header 'X-Backend-Header' to be 'backend-value', got '%s'", header)
