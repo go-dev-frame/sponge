@@ -92,9 +92,11 @@ function testRequest() {
   checkErrCount $?
 
   echo -e "\n\n"
-  echo -e "${colorCyan}go test -run Test_service_${mysqlTableNameCamelFCL}_methods/ListByLastID ${markEnd}"
-  sed -i "s/Limit:  0,/Limit:  3,/g" ${mysqlTableNameCamelFCL}_client_test.go
-  go test -run Test_service_${mysqlTableNameCamelFCL}_methods/ListByLastID
+  echo -e "${colorCyan}go test -run Test_service_${mysqlTableNameCamelFCL}_methods/List ${markEnd}"
+  sed -i "s/Params: nil,/Params: \&types.Params{Limit: 3},/g" ${mysqlTableNameCamelFCL}_client_test.go
+  sed -i "/\"${mysqlTableNameCamelFCL}\/internal\/config\"/a\\
+\"${mysqlTableNameCamelFCL}\/api\/types\"" ${mysqlTableNameCamelFCL}_client_test.go
+  go test -run Test_service_${mysqlTableNameCamelFCL}_methods/List
   checkErrCount $?
 
   cd -

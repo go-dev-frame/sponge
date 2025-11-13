@@ -1,6 +1,7 @@
 #!/bin/bash
 
 rm -rf go.mod go.sum \
+pkg \
 api \
 third_party \
 mono_01_http_mysql \

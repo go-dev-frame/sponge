@@ -843,36 +843,72 @@ function generate_grpc_gw_pb() {
   cd -
 }
 
-function main() {
-  generate_http_mysql
-  generate_http_postgresql
-  generate_http_sqlite
-  generate_http_mongodb
-
-  generate_grpc_mysql
-  generate_grpc_postgresql
-  generate_grpc_sqlite
-  generate_grpc_mongodb
-
-  generate_grpc_http_mysql
-  generate_grpc_http_postgresql
-  generate_grpc_http_sqlite
-  generate_grpc_http_mongodb
-
-  generate_http_pb_mysql
-  generate_http_pb_mongodb
-
-  generate_grpc_pb_mysql
-  generate_grpc_pb_mongodb
-
-  generate_grpc_http_pb_mysql
-  generate_grpc_http_pb_mongodb
-
-  generate_http_pb_mixed
-  generate_grpc_pb_mixed
-
-  generate_grpc_gw_pb_mixed
-  generate_grpc_gw_pb
+function patchDependencyPackage() {
+  echo "replace (
+	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20240814211410-ddb44dafa142
+	google.golang.org/genproto/googleapis/api => google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
+)" >> go.mod
+  go mod tidy
 }
 
-main
+# -------------------------------------------------------------------------------------------
+
+runCase=$1
+
+run_all() {
+  echo ">>> Running all cases..."
+  let count=0
+  all_cases=(
+    generate_http_mysql generate_http_postgresql generate_http_sqlite generate_http_mongodb
+    generate_grpc_mysql generate_grpc_postgresql generate_grpc_sqlite generate_grpc_mongodb
+    generate_grpc_http_mysql generate_grpc_http_postgresql generate_grpc_http_sqlite generate_grpc_http_mongodb
+    generate_http_pb_mysql generate_http_pb_mongodb
+    generate_grpc_pb_mysql generate_grpc_pb_mongodb
+    generate_grpc_http_pb_mysql generate_grpc_http_pb_mongodb
+    generate_http_pb_mixed generate_grpc_pb_mixed generate_grpc_gw_pb_mixed generate_grpc_gw_pb
+  )
+  for fn in "${all_cases[@]}"; do
+      echo ">>> Executing: $fn"
+      count=$((count+1))
+      if (( count % 3 == 0 )); then
+        echo ">>> Cleaning mono repo..."
+        bash clean_mono_repo.sh
+      fi
+      $fn
+      if [ "$fn" == "generate_http_mongodb" ] ; then
+        patchDependencyPackage
+      fi
+      echo ">>> Done: $fn"
+      echo
+  done
+}
+
+case "$runCase" in
+  1_http_mysql)            generate_http_mysql ;;
+  2_http_postgresql)       generate_http_postgresql ;;
+  3_http_sqlite)           generate_http_sqlite ;;
+  4_http_mongodb)          generate_http_mongodb ;;
+  5_grpc_mysql)            generate_grpc_mysql ;;
+  6_grpc_postgresql)       generate_grpc_postgresql ;;
+  7_grpc_sqlite)           generate_grpc_sqlite ;;
+  8_grpc_mongodb)          generate_grpc_mongodb ;;
+  9_grpc_http_mysql)       generate_grpc_http_mysql ;;
+  10_grpc_http_postgresql) generate_grpc_http_postgresql ;;
+  11_grpc_http_sqlite)     generate_grpc_http_sqlite ;;
+  12_grpc_http_mongodb)    generate_grpc_http_mongodb ;;
+  13_http_pb_mysql)        generate_http_pb_mysql ;;
+  14_http_pb_mongodb)      generate_http_pb_mongodb ;;
+  15_grpc_pb_mysql)        generate_grpc_pb_mysql ;;
+  16_grpc_pb_mongodb)      generate_grpc_pb_mongodb ;;
+  17_grpc_http_pb_mysql)   generate_grpc_http_pb_mysql ;;
+  18_grpc_http_pb_mongodb) generate_grpc_http_pb_mongodb ;;
+  19_http_pb_mixed)        generate_http_pb_mixed ;;
+  20_grpc_pb_mixed)        generate_grpc_pb_mixed ;;
+  21_grpc_gw_pb_mixed)     generate_grpc_gw_pb_mixed ;;
+  22_grpc_gw_pb)           generate_grpc_gw_pb ;;
+  "")                      run_all ;;
+  *)
+    echo "Invalid argument: $runCase"
+    echo "Usage: bash auto.sh [1_http_mysql|2_http_postgresql|...|22_grpc_gw_pb]"
+    ;;
+esac
