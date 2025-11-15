@@ -18,6 +18,7 @@ func CreateServices() []app.IServer {
 	httpAddr := ":" + strconv.Itoa(cfg.HTTP.Port)
 	httpServer := server.NewHTTPServer(httpAddr,
 		server.WithHTTPIsProd(cfg.App.Env == "prod"),
+		server.WithHTTPTLS(cfg.HTTP.TLS),
 	)
 	servers = append(servers, httpServer)
 

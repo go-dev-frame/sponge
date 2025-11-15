@@ -19,6 +19,7 @@ func CreateServices() []app.IServer {
 	// case 1, create http and grpc services without registry
 	httpServer := server.NewHTTPServer(httpAddr,
 		server.WithHTTPIsProd(cfg.App.Env == "prod"),
+		server.WithHTTPTLS(cfg.HTTP.TLS),
 	)
 	grpcServer := server.NewGRPCServer(grpcAddr)
 
@@ -27,6 +28,7 @@ func CreateServices() []app.IServer {
 	//httpServer := server.NewHTTPServer(httpAddr,
 	//	server.WithHTTPRegistry(httpRegistry, httpInstance),
 	//	server.WithHTTPIsProd(cfg.App.Env == "prod"),
+	//	server.WithHTTPTLS(cfg.HTTP.TLS),
 	//)
 	//grpcRegistry, grpcInstance := registerService("grpc", cfg.App.Host, cfg.Grpc.Port)
 	//grpcServer := server.NewGRPCServer(grpcAddr,

@@ -76,6 +76,14 @@ type ServerSecure struct {
 	Type     string `yaml:"type" json:"type"`
 }
 
+type TLS struct {
+	CertFile   string `yaml:"certFile" json:"certFile"`
+	Domain     string `yaml:"domain" json:"domain"`
+	Email      string `yaml:"email" json:"email"`
+	EnableMode string `yaml:"enableMode" json:"enableMode"`
+	KeyFile    string `yaml:"keyFile" json:"keyFile"`
+}
+
 type App struct {
 	CacheType             string  `yaml:"cacheType" json:"cacheType"`
 	EnableCircuitBreaker  bool    `yaml:"enableCircuitBreaker" json:"enableCircuitBreaker"`
@@ -169,4 +177,5 @@ type NacosRd struct {
 type HTTP struct {
 	Port    int `yaml:"port" json:"port"`
 	Timeout int `yaml:"timeout" json:"timeout"`
+	TLS     TLS `yaml:"tls" json:"tls"`
 }

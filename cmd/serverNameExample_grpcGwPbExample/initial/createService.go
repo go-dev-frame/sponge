@@ -18,6 +18,7 @@ func CreateServices() []app.IServer {
 	// case 1, create a http service without registry
 	httpServer := server.NewHTTPServer_pbExample(httpAddr,
 		server.WithHTTPIsProd(cfg.App.Env == "prod"),
+		server.WithHTTPTLS(cfg.HTTP.TLS),
 	)
 
 	// case 2, Create a http service and register it with consul or etcd or nacos
@@ -25,6 +26,7 @@ func CreateServices() []app.IServer {
 	//httpServer := server.NewHTTPServer_pbExample(httpAddr,
 	//	server.WithHTTPRegistry(httpRegistry, httpInstance),
 	//	server.WithHTTPIsProd(cfg.App.Env == "prod"),
+	//	server.WithHTTPTLS(cfg.HTTP.TLS),
 	//)
 
 	servers = append(servers, httpServer)

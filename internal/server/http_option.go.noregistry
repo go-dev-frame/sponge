@@ -1,10 +1,15 @@
 package server
 
+import (
+	"github.com/go-dev-frame/sponge/internal/config"
+)
+
 // HTTPOption setting up http
 type HTTPOption func(*httpOptions)
 
 type httpOptions struct {
 	isProd bool
+	tls      config.TLS
 }
 
 func defaultHTTPOptions() *httpOptions {
@@ -23,5 +28,12 @@ func (o *httpOptions) apply(opts ...HTTPOption) {
 func WithHTTPIsProd(isProd bool) HTTPOption {
 	return func(o *httpOptions) {
 		o.isProd = isProd
+	}
+}
+
+// WithHTTPTLS setting up tls
+func WithHTTPTLS(tls config.TLS) HTTPOption {
+	return func(o *httpOptions) {
+		o.tls = tls
 	}
 }

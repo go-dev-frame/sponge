@@ -85,11 +85,12 @@ func TestHTTPServerMock(t *testing.T) {
 		instance:  &registry.ServiceInstance{},
 		iRegistry: &iRegistry{},
 	}
-	s.server = &http.Server{
+	server := &http.Server{
 		Addr:           addr,
 		Handler:        http.NewServeMux(),
 		MaxHeaderBytes: 1 << 20,
 	}
+	s.server = newServer(server, config.Get().HTTP.TLS)
 
 	go func() {
 		time.Sleep(time.Second * 3)
@@ -112,4 +113,49 @@ func (i *iRegistry) Register(ctx context.Context, service *registry.ServiceInsta
 
 func (i *iRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	return nil
+}
+
+func Test_newServer(t *testing.T) {
+	tests := []struct {
+		name   string
+		tls    config.TLS
+		scheme string
+	}{
+		{
+			name:   "no_tls",
+			tls:    config.TLS{},
+			scheme: "http",
+		},
+		{
+			name: "tls_self_signed",
+			tls: config.TLS{
+				EnableMode: "self-signed",
+			},
+			scheme: "https",
+		},
+		{
+			name: "tls_encrypt",
+			tls: config.TLS{
+				EnableMode: "encrypt",
+				Domain:     "example.com",
+				Email:      "admin@example.com",
+			},
+			scheme: "https",
+		},
+		{
+			name: "tls_external",
+			tls: config.TLS{
+				EnableMode: "external",
+				CertFile:   "cert.pem",
+				KeyFile:    "key.pem",
+			},
+			scheme: "https",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := newServer(&http.Server{}, tt.tls)
+			assert.Equal(t, tt.scheme, server.Scheme())
+		})
+	}
 }

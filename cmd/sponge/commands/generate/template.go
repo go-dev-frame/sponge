@@ -370,7 +370,17 @@ func NewCenter(configFile string) (*Center, error) {
 	httpServerConfigCode = `# http server settings
 http:
   port: 8080                # listen port
-  timeout: 0                # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s`
+  timeout: 0                 # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s
+  tls:
+    # TLS mode options:
+    #   self-signed  - Use localhost self-signed certificate
+    #   encrypt      - Use Let's Encrypt (requires domain & email)
+    #   external     - Use external certificates (requires certFile & keyFile)
+    enableMode: ""
+    domain: ""        # Required if enableMode = encrypt
+    email: ""         # Required if enableMode = encrypt
+    certFile: ""      # Required if enableMode = external, absolute path of cert file
+    keyFile: ""       # Required if enableMode = external, absolute path of key file`
 
 	rpcServerConfigCode = `# grpc server settings
 grpc:
@@ -414,6 +424,16 @@ grpcClient:
 http:
   port: 8080                # listen port
   timeout: 0                 # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s
+  tls:
+    # TLS mode options:
+    #   self-signed  - Use localhost self-signed certificate
+    #   encrypt      - Use Let's Encrypt (requires domain & email)
+    #   external     - Use external certificates (requires certFile & keyFile)
+    enableMode: ""
+    domain: ""        # Required if enableMode = encrypt
+    email: ""         # Required if enableMode = encrypt
+    certFile: ""      # Required if enableMode = external, absolute path of cert file
+    keyFile: ""       # Required if enableMode = external, absolute path of key file
 
 
 # grpc client-side settings, support for setting up multiple grpc clients.
@@ -441,7 +461,17 @@ grpcClient:
 	grpcAndHTTPServerConfigCode = `# http server settings
 http:
   port: 8080                # listen port
-  timeout: 0                # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s
+  timeout: 0                 # request timeout, unit(second), if 0 means not set, if greater than 0 means set timeout, if enableHTTPProfile is true, it needs to set 0 or greater than 60s
+  tls:
+    # TLS mode options:
+    #   self-signed  - Use localhost self-signed certificate
+    #   encrypt      - Use Let's Encrypt (requires domain & email)
+    #   external     - Use external certificates (requires certFile & keyFile)
+    enableMode: ""
+    domain: ""        # Required if enableMode = encrypt
+    email: ""         # Required if enableMode = encrypt
+    certFile: ""      # Required if enableMode = external, absolute path of cert file
+    keyFile: ""       # Required if enableMode = external, absolute path of key file
 
 
 # grpc server settings

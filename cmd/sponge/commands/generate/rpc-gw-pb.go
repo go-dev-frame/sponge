@@ -212,10 +212,6 @@ func (g *rpcGwPbGenerator) addFields(r replacer.Replacer) []replacer.Field {
 			Old: appConfigFileMark2,
 			New: getDBConfigCode(""), // no db config
 		},
-		{ // replace the configuration of the *.yml file
-			Old: appConfigFileMark,
-			New: "",
-		},
 		//{ // replace the contents of the model/init.go file
 		//	Old: modelInitDBFileMark,
 		//	New: getInitDBCode(DBDriverMysql), // default is mysql

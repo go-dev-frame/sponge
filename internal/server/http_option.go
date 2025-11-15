@@ -2,6 +2,8 @@ package server
 
 import (
 	"github.com/go-dev-frame/sponge/pkg/servicerd/registry"
+
+	"github.com/go-dev-frame/sponge/internal/config"
 )
 
 // HTTPOption setting up http
@@ -11,6 +13,7 @@ type httpOptions struct {
 	isProd    bool
 	instance  *registry.ServiceInstance
 	iRegistry registry.Registry
+	tls       config.TLS
 }
 
 func defaultHTTPOptions() *httpOptions {
@@ -39,5 +42,12 @@ func WithHTTPRegistry(iRegistry registry.Registry, instance *registry.ServiceIns
 	return func(o *httpOptions) {
 		o.iRegistry = iRegistry
 		o.instance = instance
+	}
+}
+
+// WithHTTPTLS setting up tls
+func WithHTTPTLS(tls config.TLS) HTTPOption {
+	return func(o *httpOptions) {
+		o.tls = tls
 	}
 }
