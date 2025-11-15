@@ -194,11 +194,7 @@ func (c *TLSSelfSignedConfig) createCert() error {
 	if err != nil {
 		return err
 	}
-	if err = pem.Encode(keyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}); err != nil {
-		return err
-	}
-
-	return nil
+	return pem.Encode(keyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: b})
 }
 
 func (c *TLSSelfSignedConfig) Run(server *http.Server) error {
