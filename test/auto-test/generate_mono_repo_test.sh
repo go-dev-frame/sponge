@@ -857,7 +857,7 @@ runCase=$1
 
 run_all() {
   echo ">>> Running all cases..."
-  let count=0
+  local count=0
   all_cases=(
     generate_http_mysql generate_http_postgresql generate_http_sqlite generate_http_mongodb
     generate_grpc_mysql generate_grpc_postgresql generate_grpc_sqlite generate_grpc_mongodb
