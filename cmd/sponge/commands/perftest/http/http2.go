@@ -177,8 +177,8 @@ func newHTTP2Client(worker int) *http.Client {
 				Timeout:   5 * time.Second,
 				KeepAlive: 15 * time.Second,
 			}).DialContext,
-			MaxIdleConns:          worker + 10, // default 100
-			MaxIdleConnsPerHost:   worker,      // default 2
+			MaxIdleConns:          worker + 10,
+			MaxIdleConnsPerHost:   worker,
 			IdleConnTimeout:       90 * time.Second,
 			TLSHandshakeTimeout:   10 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,                       // default 1 second
