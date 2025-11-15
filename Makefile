@@ -53,9 +53,9 @@ graph:
 
 # delete the templates code start
 .PHONY: docs
-# Generate swagger docs, only for ⓵ Web services created based on sql
+# Generate swagger docs, only for ⓵ Create web server based on sql
 docs:
-	@bash scripts/swag-docs.sh $(HOST)
+	@bash scripts/swag-docs.sh
 # delete the templates code end
 
 .PHONY: proto

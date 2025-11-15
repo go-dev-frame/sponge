@@ -1,7 +1,5 @@
 #!/bin/bash
 
-HOST_ADDR=$1
-
 function checkResult() {
     result=$1
     if [ ${result} -ne 0 ]; then
@@ -14,12 +12,26 @@ go mod tidy
 checkResult $?
 gofmt -s -w .
 
-# change host addr
-if [ "X${HOST_ADDR}" = "X" ];then
-  HOST_ADDR=$(cat cmd/serverNameExample_mixExample/main.go | grep "@host" | awk '{print $3}')
-  HOST_ADDR=$(echo  ${HOST_ADDR} | cut -d ':' -f 1)
-else
-    sed -i "s/@host .*:8080/@host ${HOST_ADDR}:8080/g" cmd/serverNameExample_mixExample/main.go
+# get config address from serverNameExample_mixExample.yml
+configHost=$(bash scripts/parseYaml.sh configs/serverNameExample_mixExample.yml '.app.host')
+if [ "${configHost}" = "127.0.0.1" ]; then
+  configHost="localhost"
+fi
+configPort=$(bash scripts/parseYaml.sh configs/serverNameExample_mixExample.yml '.http.port')
+configAddr="${configHost}:${configPort}"
+enableMode=$(bash scripts/parseYaml.sh configs/serverNameExample_mixExample.yml '.http.tls.enableMode')
+schemes="http"
+if [ "$enableMode" != "" ]; then
+  schemes="https"
+fi
+
+# get swagger address from main.go
+swaggerAddr=$(grep -E '^[[:space:]]*//[[:space:]]*@host' "cmd/serverNameExample_mixExample/main.go" | awk '{print $3}')
+if [[ -z "${swaggerAddr}" ]]; then
+  swaggerAddr="localhost:8080"
+fi
+if [ "${configAddr}" != "${swaggerAddr}" ];then
+  sed -i "s/${swaggerAddr}/${configAddr}/g" cmd/serverNameExample_mixExample/main.go
 fi
 
 # generate api docs
@@ -38,7 +50,7 @@ highBright='\033[1m'
 markEnd='\033[0m'
 
 echo ""
-echo -e "${highBright}Tip:${markEnd} execute the command ${colorCyan}make run${markEnd} and then visit ${colorCyan}http://${HOST_ADDR}:8080/swagger/index.html${markEnd} in your browser."
+echo -e "${highBright}Tip:${markEnd} start the service with ${colorCyan}make run${markEnd}, and open ${colorCyan}${schemes}://${configAddr}/swagger/index.html${markEnd} to explore the Swagger API docs."
 echo ""
 echo -e "${colorGreen}generated api docs done.${markEnd}"
 echo ""
