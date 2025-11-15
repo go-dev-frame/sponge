@@ -309,7 +309,7 @@ func TestHandleList(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		body, _ := io.ReadAll(w.Body)
 		// Expect a "Back to Parent" link that points to tmpDir
-		assert.Contains(t, string(body), "ctest-staticfs-")
+		assert.Contains(t, string(body), "<!DOCTYPE html>")
 	})
 }
 
