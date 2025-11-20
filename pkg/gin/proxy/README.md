@@ -1,4 +1,4 @@
-## Gin Proxy
+## Gin Reverse Proxy
 
 A production-grade reverse proxy library implemented in Go. It not only provides high performance and multiple load balancing strategies, but also supports **dynamic route management**, allowing you to add or remove backend servers at runtime via API — without restarting the service.
 
@@ -77,3 +77,70 @@ func pass2(p *proxy.Proxy) {
         proxy.WithPassMiddlewares(Middlewares...),
     })
     ```
+
+<br>
+
+### Management API Guide
+
+After the proxy is started, you can manage backend services dynamically via the following APIs.
+
+#### 1. List all backends
+
+Retrieve all backend nodes and their health status for the given route.
+
+* **GET** `/endpoints/list?prefixPath=/proxy/`
+
+```json
+{
+  "prefixPath": "/proxy/",
+  "targets": [
+    {"target": "http://localhost:8081", "healthy": true},
+    {"target": "http://localhost:8082", "healthy": true}
+  ]
+}
+```
+
+<br>
+
+#### 2. Add backend nodes
+
+Dynamically scale out. New nodes will automatically enter the health check loop and start receiving traffic.
+
+* **POST** `/endpoints/add`
+* **Body**:
+
+  ```json
+  {
+    "prefixPath": "/proxy/",
+    "targets": ["http://localhost:8085"]
+  }
+  ```
+
+<br>
+
+#### 3. Remove backend nodes
+
+Dynamically scale in. Health checks for removed nodes will stop automatically.
+
+* **POST** `/endpoints/remove`
+* **Body**:
+
+  ```json
+  {
+    "prefixPath": "/proxy/",
+    "targets": ["http://localhost:8085"]
+  }
+  ```
+
+<br>
+
+#### 4. Check the status of a single backend node
+
+* **GET** `/endpoints?prefixPath=/proxy/&target=http://localhost:8082`
+
+   ```json
+   {
+     "target": "http://localhost:8082",
+     "healthy": true
+   }
+   ```

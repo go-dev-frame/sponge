@@ -15,124 +15,143 @@
 
 </div>
 
-**Sponge** is a powerful and easy-to-use Go development framework. Its core philosophy is **"Definition is Code"**. It generates modular Go code by parsing `SQL`, `Protobuf`, and `JSON` files. These code modules can be flexibly combined to build various types of complete backend services.
+<br>
 
-Sponge provides a one-stop project development solution, covering code generation, development, testing, API documentation, and deployment. It helps developers easily build stable and reliable high-performance backend services (including RESTful API, gRPC, HTTP+gRPC, gRPC Gateway, etc.) in a "low-code" manner, significantly improving the efficiency and quality of project development.
+### Introduction
+
+**Sponge** is a powerful and easy-to-use Go development framework. It integrates **automatic code generation**, **Web frameworks (Gin)**, and **microservice frameworks (gRPC)**, covering the full lifecycle from project generation, development, and testing to API documentation and deployment.
+
+Sponge's core philosophy is **"Definition is Code"**. By parsing SQL, Protobuf, and JSON configuration files, it generates modular backend service code. You can flexibly combine these code modules like building blocks to quickly construct various backend systems ranging from monolithic applications to microservice clusters (including RESTful API, gRPC, HTTP+gRPC, gRPC Gateway, etc.).
+
+Sponge aims to improve the development efficiency and code quality of backend services. Through a **low-code** approach, it helps developers completely eliminate tedious repetitive work (such as CRUD, routing configuration, and project structure setup), allowing them to focus on the implementation of core business logic.
 
 <br>
 
 ### Why Choose Sponge?
 
-- **Extremely High Development Efficiency**: Automatically generates CRUD APIs, project scaffolding, and glue code (non-business code), completely solving the problem of extensive repetitive work in traditional development processes.
-- **Out-of-the-Box**: Covers the entire development lifecycle (generate → develop → test → deploy → monitor), avoiding a fragmented toolchain.
-- **Standardized Best Practices**: Based on mature solutions from the Go community (Gin/gRPC/Protobuf, etc.), eliminating the hassle of technology selection.
-- **Minimal Learning Curve**: Get started quickly and focus on business logic through code generation and clear examples.
-- **Ideal for Team Collaboration**: Unified project structure improves code maintainability.
-- **AI Collaborative Development**: Sponge’s built-in AI assistant understands directory and file structures, intelligently generates business logic code based on context, significantly reduces manual coding, and improves development efficiency and code consistency.
+- **Extreme Development Efficiency**: Automatically generates CRUD APIs, project scaffolding, and extensive boilerplate code, letting developers say goodbye to repetitive labor.
+- **Out of the Box**: Provides a complete development toolchain (Generate → Develop → Test → Deploy → Monitor), eliminating the need to piece together fragmented tools.
+- **Industry Best Practices**: Built on the mainstream Go community tech stack (Gin/GORM/gRPC/Protobuf, etc.), with a standardized architecture to reduce technology selection risks.
+* **Flexible and Extensible**: Supports custom templates, not limited to Go; can extend to generate frontend code, test scripts, and arbitrary code.
+- **Gentle Learning Curve**: Low entry barrier and easy to get started.
+- **Suitable for Team Collaboration**: Unified project structure improves team collaboration efficiency and code maintainability.
+- **Fusion of Low-Code and AI**:
+    - **Sponge** handles the generation of standardized infrastructure code (APIs, data layer, service frameworks).
+    - **AI Models** perceive the project context and assist in generating core business logic, achieving "Automated Infrastructure, Intelligent Business".
 
 <br>
 
 ### Key Features
 
 <details>
-<summary> <b>One-Click Generation of Complete Backend Service Code.</b> </summary>
+<summary> <b>One-click Generation of Complete Backend Services (Zero-Code).</b> </summary>
 
-> For `Web`, `gRPC`, or `HTTP+gRPC` services that only require `CRUD APIs`, there is no need to write any `Go` code. Simply connect to a database (such as `MySQL`, `MongoDB`, `PostgreSQL`, `SQLite`), and you can generate the complete backend service code with one click and easily deploy it to a Linux server, Docker, or Kubernetes.
+> For scenarios requiring only basic `CRUD` capabilities (Web, gRPC, or HTTP+gRPC), **no Go code needs to be written**. simply connect to a database (MySQL, MongoDB, PostgreSQL, SQLite) to generate a complete backend service with one click, supporting direct deployment to Linux, Docker, or Kubernetes.
 </details>
 
 <details>
-<summary> <b>Efficiently Develop General-Purpose Services, from Definition to Implementation in One Step.</b> </summary>
+<summary> <b>Protocol-Driven Development for General Backend Services, from Definition to Implementation in One Step.</b> </summary>
 
-> To build general-purpose `Web`, `gRPC`, `HTTP+gRPC`, or `gRPC Gateway` services, you only need to focus on these three steps:
-> - Define database tables (SQL DDL);
-> - Describe the API in a Protobuf file (Protobuf IDL);
-> - Implement the business logic (supports a built-in AI assistant to automatically generate and merge business logic code).
->
-> All basic code, including **CRUD APIs, service framework, and glue code**, is **automatically generated by Sponge**, allowing developers to focus on core business and comprehensively improve development efficiency.
+> For general `Web`, `gRPC`, `HTTP+gRPC`, or `gRPC Gateway` services, a standardized development process is adopted:
+> 1. **Define Data**: Design SQL DDL.
+> 2. **Define Interface**: Write Protobuf IDL.
+> 3. **Generate Code**: Sponge automatically generates CRUD, routing, documentation, and glue code.
+> 4. **Fill Business**: Use Sponge's built-in AI model or manually complete the core logic.
+
 </details>
 
 <details>
-<summary> <b>Supports Custom Templates for Flexible Expansion.</b> </summary>
+<summary> <b>Visual Code Generation, Simple and Easy to Use.</b> </summary>
 
-> Sponge supports generating various types of code required for a project through custom templates, not limited to the `Go` language. Examples include `backend code`, `frontend code`, `test code`, `build and deployment scripts`, etc.
+> Say goodbye to complex command-line arguments. Sponge provides an intuitive Web UI, allowing you to complete code generation through simple form configurations, lowering the barrier to entry.
 </details>
 
 <details>
-<summary> <b>Generate Code on a Web Page, Simple and Easy to Use.</b> </summary>
+<summary> <b>AI Collaborative Development.</b> </summary>
 
-> Sponge provides code generation on a web page, avoiding complex command-line operations. Simply fill in the parameters on the page to generate code with one click.
+> Sponge integrates with AI models like DeepSeek, ChatGPT, and Gemini. Sponge handles the tedious engineering structure and standardized code, while the AI model focuses on understanding requirements and generating specific business logic code, significantly improving code consistency and R&D speed.
+
 </details>
 
 <details>
-<summary> <b>Sponge and AI Assistant Collaborative Development for Infrastructure Automation and Business Logic Intelligence.</b> </summary>
+<summary> <b>Support for Custom Templates, Flexible Extension.</b> </summary>
 
-> Sponge, combined with its built-in AI assistants (DeepSeek, ChatGPT, Gemini), creates a complete, efficient, and intelligent development solution:
-> - **Sponge**: Responsible for the automatic generation of infrastructure code, including `service framework`, `CRUD APIs`, `custom APIs (without business logic)`, etc., ensuring a unified and standardized architecture.
-> - **AI Assistant**: Focuses on business logic implementation, assisting with tasks such as `database table design`, `Protobuf API definition`, and `business logic writing`, reducing repetitive work and improving R&D efficiency.
+> Not limited to the Go language, you can generate frontend code, test scripts, CI/CD configurations, and any text file through custom templates to meet specific team engineering needs.
+
 </details>
 
 <br>
 
 ### Applicable Scenarios
 
-Sponge is suitable for rapidly building various types of high-performance backend services, including the following scenarios:
+Sponge is suitable for building high-performance, maintainable backend systems, specifically for:
 
-- **Developing RESTful API services**
-- **Building microservice projects**
-- **Cloud-native project development**
-- **Rapidly refactoring legacy projects**
-- **As a starting point for Go beginners or as a best practice for teams**
-
-Additionally, developers can generate various types of code to meet business needs through custom templates.
+- **Rapid development of RESTful API services**
+- **Building large-scale microservice architectures**
+- **Cloud-native application development**
+- **Rapid refactoring and migration of legacy projects**
+- **Standardized engineering templates for Go beginners or teams**
 
 <br>
 
-### Online Experience
+### Online Demo
 
-Sponge provides an online experience for code generation: [**Code Generation**](https://go-sponge.com/en/ui).
+No installation required, experience the code generation feature directly in your browser: [**Code Generation**](https://go-sponge.com/en/ui)
 
 > Note: If you need to run the downloaded service code locally, you must first complete the local installation of Sponge.
 
 <br>
 
-### Getting Started
+### Quick Start
 
-1.  **Install Sponge**: Supports Windows/macOS/Linux/Docker, see the [**Sponge Installation Guide**](https://github.com/go-dev-frame/sponge/blob/main/assets/install-en.md).
+1. **Install Sponge**: Supports Windows, macOS, Linux, and Docker environments. View the [**Sponge Installation Guide**](https://github.com/go-dev-frame/sponge/blob/main/assets/install-en.md).
 
-2.  **Open the Code Generation UI Page**
+2. **Open the Code Generation UI Page**
 
-    ```bash
-    sponge run
-    ```
+   ```bash
+   sponge run
+   ```
 
-    Access `http://localhost:24631` in your local browser to generate code.
+   Access `http://localhost:24631` in your local browser to generate code.
 
-3.  **Example: One-Click Generation of Complete Web Service Backend Code**
+3. **Example: One-click Generation of Web Service Backend Code Based on SQL**
 
-    <p align="center">
-    <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_sponge-ui.png">
-    </p>
+   <p align="center">
+   <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_sponge-ui.png">
+   </p>
 
-    - Steps for running and testing the project locally:
-      - **Fill in parameters**: Connect to the database and select the table name.
-      - **Download code**: Obtain the complete project code.
-      - **Generate Swagger documentation**: Run the command `make docs`.
-      - **Start the service**: Run the command `make run`.
-      - **API testing**: Open `http://localhost:8080/swagger/index.html` in the browser and use the Swagger UI to test APIs.
-
-<br>
-
-### Components
-
-Sponge has built-in support for over 30 common components in the Go ecosystem (used on demand), including mainstream technology stacks such as **Gin**, **gRPC**, **GORM**, **MongoDB**, **Redis**, **Kafka**, **DTM**, **WebSocket**, **Prometheus**, etc. [**View all components**](https://go-sponge.com/component/).
+    - Operation Process:
+        - **Fill Parameters**: Connect to the database and select tables in the UI.
+        - **Download Code**: Click generate and download the complete project package.
+        - **Generate Swagger Documentation**: Execute `make docs` in the project root directory.
+        - **Start Service**: Execute `make run`.
+        - **Test Interface**: Access `http://localhost:8080/swagger/index.html` in the browser to test APIs via the Swagger interface.
 
 <br>
 
-### Code Generation Engine
+### Tech Stack & Components
 
-**Sponge** provides powerful code generation capabilities, supporting both `built-in templates` and `custom templates` to quickly generate the code required for your project. It also integrates an `AI assistant` to help generate business logic code.
+Sponge follows the "batteries included" principle, integrating 30+ mainstream Go ecosystem components, loaded on demand:
 
-1. Sponge generates a code framework based on built-in templates, as shown in the diagram below:
+| Category | Component                                                    |
+| :--- |:------------------------------------------------------|
+| **Frameworks** | Gin, gRPC                                             |
+| **Database** | GORM (MySQL, PostgreSQL, SQLite, etc.), MongoDB            |
+| **Cache/Messaging** | Redis, Kafka, RabbitMQ                                |
+| **Service Governance** | Etcd, Consul, Nacos, Jaeger, Prometheus, OpenTelemetry               |
+| **Others** | DTM (Distributed Transaction), WebSocket, Swagger, PProf |
+
+👉 [**View the complete list of tech stacks and components**](https://go-sponge.com/component/).
+
+<br>
+
+### Architecture & Principles
+
+#### Code Generation Engine
+
+Sponge provides multiple code generation engines, supporting **built-in templates**, **custom templates**, and **AI-assisted generation**.
+
+1. Code generation engine based on **built-in templates**, as shown below:
 
 <p align="center">
 <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-framework.png">
@@ -140,7 +159,7 @@ Sponge has built-in support for over 30 common components in the Go ecosystem (u
 
 <br>
 
-2. Sponge generates a code framework based on custom templates, as shown in the diagram below:
+2. Code generation engine based on **custom templates**, as shown below:
 
 <p align="center">
 <img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/template-framework.png">
@@ -148,7 +167,7 @@ Sponge has built-in support for over 30 common components in the Go ecosystem (u
 
 <br>
 
-3. Sponge generates a business logic code framework based on functions and comments, as shown in the diagram below:
+3. Code generation engine based on **AI-assisted business logic**, as shown below:
 
 <p align="center">
 <img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/ai-assistant-framework.png">
@@ -156,9 +175,9 @@ Sponge has built-in support for over 30 common components in the Go ecosystem (u
 
 <br>
 
-### Microservice framework
+#### Microservice Architecture
 
-**Sponge** is a modern Go microservice framework that adopts a typical layered microservice architecture. It comes with a rich set of built-in service governance features, enabling developers to quickly build and maintain complex microservice systems. The structure of the framework is shown in the diagram below:
+The code generated by Sponge follows a typical layered architecture with built-in service governance capabilities. The structure is clear and easy to maintain. A modern microservice framework structure is shown below:
 
 <p align="center">
 <img width="1000px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_microservices-framework.png">
@@ -166,118 +185,114 @@ Sponge has built-in support for over 30 common components in the Go ecosystem (u
 
 <br>
 
-Performance testing of http and grpc service code created by the microservices framework: 50 concurrent, 1 million total requests.
+### Performance Benchmarks
 
-![http-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/http-server.png)
+Based on tests with 50 concurrency and 1 million requests, services generated by Sponge demonstrate excellent performance:
 
-![grpc-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/grpc-server.png)
+1. **HTTP Service**
+   ![http-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/http-server.png)
 
-Click to view the [**test code**](https://github.com/zhufuyi/microservices_framework_benchmark).
+2. **gRPC Service**
+   ![grpc-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/grpc-server.png)
+
+👉 [**View detailed test code and environment**](https://github.com/zhufuyi/microservices_framework_benchmark).
 
 <br>
 
-### Project Code Directory Structure
+### Directory Structure
 
-The project code directory structure created by sponge follows the [project-layout](https://github.com/golang-standards/project-layout).
-
-Sponge supports creating project code structures for `monolithic application in a single repository (monolith)`, `microservices in multiple repositories (multi-repo)`, and `microservices in a single repository (mono-repo)`.
+The service code directory structure created by Sponge follows the [project-layout](https://github.com/golang-standards/project-layout), supporting **Monolith**, **Multi-Repo**, and **Mono-Repo** patterns.
 
 <details>
-<summary> <b>1. Directory structure for monolithic applications (monolith) or multi-repo microservices.</b> </summary>
+<summary> <b>1. Monolith / Multi-Repo Structure Details.</b> </summary>
 
-   ```bash
+```bash
    .
-   ├── api            # Protobuf files and generated * pb.go directory
-   ├── assets         # Store various static resources, such as images, markdown files, etc.
-   ├── cmd            # Program entry directory
+   ├── api            # Directory for protobuf files and generated *pb.go files
+   ├── assets         # Directory for other assets used with the repository (images, logos, etc.)
+   ├── cmd            # Main application entry directory
    ├── configs        # Directory for configuration files
-   ├── deployments    # Bare metal, docker, k8s deployment script directory.
-   ├── docs           # Directory for API interface Swagger documentation.
-   ├── internal       # Directory for project internal code.
-   │    ├── cache        # Cache directory wrapped around business logic.
-   │    ├── config       # Directory for Go structure configuration files.
-   │    ├── dao          # Data access directory.
-   │    ├── database     # Directory for database initialization and migration.
-   │    ├── ecode        # Directory for system error codes and custom business error codes.
-   │    ├── handler      # Directory for implementing HTTP business functionality (specific to web services).
-   │    ├── model        # Database model directory.
-   │    ├── routers      # HTTP routing directory.
-   │    ├── rpcclient    # Directory for client-side code that connects to grpc services.
-   │    ├── server       # Directory for creating servers, including HTTP and grpc.
-   │    ├── service      # Directory for implementing grpc business functionality (specific to grpc services).
-   │    └── types        # Directory for defining request and response parameter structures for HTTP.
-   ├── pkg            # Directory for shared libraries.
-   ├── scripts        # Directory for scripts.
-   ├── test           # Directory for scripts required for testing services  and test SQL.
-   ├── third_party    # Directory for third-party protobuf files or external helper programs.
-   ├── Makefile       # Develop, test, deploy related command sets .
-   ├── go.mod         # Go module dependencies and version control file.
-   └── go.sum         # Go module dependencies key and checksum file.
-   ```
-
+   ├── deployments    # Deployment scripts directory for bare metal, docker, k8s
+   ├── docs           # Directory for design documents and interface documentation
+   ├── internal       # Private application and library code directory
+   │    ├── cache        # Cache directory wrapped based on business logic
+   │    ├── config       # Go structure configuration file directory
+   │    ├── dao          # Data access directory
+   │    ├── database     # Database directory
+   │    ├── ecode        # Custom business error code directory
+   │    ├── handler      # HTTP business functionality implementation directory
+   │    ├── model        # Database model directory
+   │    ├── routers      # HTTP routing directory
+   │    ├── rpcclient    # Client directory for connecting to gRPC services
+   │    ├── server       # Service entry, including http, grpc, etc.
+   │    ├── service      # gRPC business functionality implementation directory
+   │    └── types        # HTTP request and response types directory
+   ├── pkg            # Library directory that can be used by external applications
+   ├── scripts        # Execution scripts directory
+   ├── test           # Additional external test applications and test data
+   ├── third_party    # Directory for dependent third-party protobuf files or other tools
+   ├── Makefile       # Collection of commands related to development, testing, and deployment
+   ├── go.mod         # Go module dependency and version control file
+   └── go.sum         # Go module dependency checksum file
+```
 </details>
 
 <details>
-<summary> <b>2. Directory structure for mono-repo microservices (large repository).</b> </summary>
+<summary> <b>2. Mono-Repo Structure Details.</b> </summary>
 
-   ```bash
+```bash
    .
    ├── api
-   │    ├── server1       # Protobuf files and generated *pb.go directory for service 1.
-   │    ├── server2       # Protobuf files and generated *pb.go directory for service 2.
-   │    ├── server3       # Protobuf files and generated *pb.go directory for service 3.
+   │    ├── server1       # Protobuf files and generated *pb.go directory for Service 1
+   │    ├── server2       # Protobuf files and generated *pb.go directory for Service 2
+   │    ├── server3       # Protobuf files and generated *pb.go directory for Service 3
    │    └── ...
-   ├── server1        # Code directory for Service 1, it has a similar structure to the microservice multi repo directory.
-   ├── server2        # Code directory for Service 2, it has a similar structure to the microservice multi repo directory.
-   ├── server3        # Code directory for Service 3, it has a similar structure to the microservice multi repo directory.
+   ├── server1        # Code directory for Service 1, basically same structure as multi-repo
+   ├── server2        # Code directory for Service 2, basically same structure as multi-repo
+   ├── server3        # Code directory for Service 3, basically same structure as multi-repo
    ├── ...
-   ├── third_party    # Third-party protobuf files.
-   ├── go.mod         # Go module dependencies and version control file.
-   └── go.sum         # Go module dependencies' checksums and hash keys.
-   ```
-
+   ├── third_party    # Dependent third-party protobuf files
+   ├── go.mod         # Go module dependency and version control file
+   └── go.sum         # Go module dependency checksum file
+```
 </details>
 
 <br>
 
 ### Documentation
 
-Click to view the [Sponge Official Documentation](https://go-sponge.com/en/), which completely covers core content such as development guides, components, service configuration, and deployment solutions.
+Click to view the [Official Sponge Documentation](https://go-sponge.com/), covering core content such as development guides, components, service configuration, and deployment solutions.
 
 <br>
 
-### Examples
+### Example Projects
 
-#### Sponge Create Server Code Examples
+#### Basic Examples
 
-- [Create **web** service based on **sql** (including CRUD)](https://github.com/go-dev-frame/sponge_examples/tree/main/1_web-gin-CRUD)
-- [Create **grpc** service based on **sql** (including CRUD)](https://github.com/go-dev-frame/sponge_examples/tree/main/2_micro-grpc-CRUD)
-- [Create **web** service based on **protobuf**](https://github.com/go-dev-frame/sponge_examples/tree/main/3_web-gin-protobuf)
-- [Create **grpc** service based on **protobuf** ](https://github.com/go-dev-frame/sponge_examples/tree/main/4_micro-grpc-protobuf)
-- [Create **grpc gateway** service based on **protobuf**](https://github.com/go-dev-frame/sponge_examples/tree/main/5_micro-gin-rpc-gateway)
-- [Create **grpc+http** service based on **protobuf**](https://github.com/go-dev-frame/sponge_examples/tree/main/_10_micro-grpc-http-protobuf)
+- [Web Service (based on SQL, includes CRUD)](https://github.com/go-dev-frame/sponge_examples/tree/main/1_web-gin-CRUD)
+- [gRPC Microservice (based on SQL, includes CRUD)](https://github.com/go-dev-frame/sponge_examples/tree/main/2_micro-grpc-CRUD)
+- [Web Service (based on Protobuf)](https://github.com/go-dev-frame/sponge_examples/tree/main/3_web-gin-protobuf)
+- [gRPC Microservice (based on Protobuf)](https://github.com/go-dev-frame/sponge_examples/tree/main/4_micro-grpc-protobuf)
+- [gRPC Gateway Service (Gateway)](https://github.com/go-dev-frame/sponge_examples/tree/main/5_micro-gin-rpc-gateway)
+- [gRPC+HTTP Microservice (based on Protobuf)](https://github.com/go-dev-frame/sponge_examples/tree/main/_10_micro-grpc-http-protobuf)
 
-#### Sponge+DTM Distributed Transaction Examples
+#### Advanced Projects
 
-- [Simple distributed order system](https://github.com/go-dev-frame/sponge_examples/tree/main/9_order-grpc-distributed-transaction)
-- [Flash sale](https://github.com/go-dev-frame/sponge_examples/tree/main/_12_sponge-dtm-flashSale)
-- [E-Commerce system](https://github.com/go-dev-frame/sponge_examples/tree/main/_14_eshop)
-
-#### Sponge+AI Assistant Collaborative Development Examples
-
-- [Home appliance retail management](https://github.com/go-dev-frame/sponge_examples/tree/main/_15_appliance_store)
-
-#### Sponge Development Project Examples
-
-- [Community backend services](https://github.com/go-dev-frame/sponge_examples/tree/main/7_community-single)
-- [Monolithic service split into microservices](https://github.com/go-dev-frame/sponge_examples/tree/main/8_community-cluster)
+- [Community Backend Service](https://github.com/go-dev-frame/sponge_examples/tree/main/7_community-single)
+- [Community Service Microservice Split](https://github.com/go-dev-frame/sponge_examples/tree/main/8_community-cluster)
+- [E-commerce Distributed Order System](https://github.com/go-dev-frame/sponge_examples/tree/main/9_order-grpc-distributed-transaction)
+- [E-commerce Flash Sale System (DTM + FlashSale)](https://github.com/go-dev-frame/sponge_examples/tree/main/_12_sponge-dtm-flashSale)
+- [E-shop System](https://github.com/go-dev-frame/sponge_examples/tree/main/_14_eshop)
+- [Appliance Store Management](https://github.com/go-dev-frame/sponge_examples/tree/main/_15_appliance_store)
 
 <br>
 
-### Contributing
+### Contribution
 
-Issues/PRs are welcome! [Contribution Guide](https://go-sponge.com/en/community/contribution.html).
+Issues and PRs are welcome! [Contribution Guide](https://go-sponge.com/community/contribution.html).
 
-If Sponge is helpful to you, please give it a ⭐ Star! This will motivate us to keep iterating.
+<br>
+
+If Sponge is helpful to you, please give it a ⭐ Star! This will be our motivation for continuous updates.
 
 <br>
