@@ -84,7 +84,7 @@ func NewPage(page int, limit int, columnNames string) *Page {
 //	columnNames="-name,-age" means sort by name descending before sorting by age descending.
 func getSort(columnNames string) string {
 	columnNames = strings.Replace(columnNames, " ", "", -1)
-	if columnNames == "" {
+	if columnNames == "" || columnNames == "ignorecount" {
 		return "id DESC"
 	}
 

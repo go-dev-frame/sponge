@@ -391,7 +391,13 @@ func TestListDirRouterSetup(t *testing.T) {
 	})
 
 	t.Run("WithDownloadEnabled", func(t *testing.T) {
-		r, tmpDir := setupTestServer(t, WithListDirDownload())
+		middleware := func(c *gin.Context) {
+			c.Header("X-Test-Header", "test-value")
+			c.Next()
+		}
+		r, tmpDir := setupTestServer(t,
+			WithListDirDownload(),
+			WithListDirMiddlewares(middleware))
 		filePath := filepath.Join(tmpDir, "file1.txt")
 		url := fmt.Sprintf("/dir/file/download?path=%s", filePath)
 		w := newRequest(t, r, "GET", url)

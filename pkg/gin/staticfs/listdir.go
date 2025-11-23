@@ -21,6 +21,7 @@ type listDirOptions struct {
 	prefixPath     string
 	enableDownload bool // default: false
 	enableFilter   bool // default: true
+	middlewares    []gin.HandlerFunc
 }
 
 func (o *listDirOptions) apply(opts ...ListDirOption) {
@@ -67,6 +68,13 @@ func WithListDirFilesFilter(filters ...string) ListDirOption {
 func WithListDirDirsFilter(filters ...string) ListDirOption {
 	return func(o *listDirOptions) {
 		sensitiveDirs = append(sensitiveDirs, filters...)
+	}
+}
+
+// WithListDirMiddlewares sets middlewares.
+func WithListDirMiddlewares(middlewares ...gin.HandlerFunc) ListDirOption {
+	return func(o *listDirOptions) {
+		o.middlewares = append(o.middlewares, middlewares...)
 	}
 }
 
@@ -317,11 +325,20 @@ func ListDir(r *gin.Engine, opts ...ListDirOption) {
 		prefixPath = ""
 	}
 
-	r.GET(prefixPath+"/dir/list", handleList(prefixPath, o))
-	if o.enableDownload {
-		r.GET(prefixPath+"/dir/file/download", handleDownload)
+	if len(o.middlewares) > 0 {
+		group := r.Group("", o.middlewares...)
+		group.GET(prefixPath+"/dir/list", handleList(prefixPath, o))
+		if o.enableDownload {
+			group.GET(prefixPath+"/dir/file/download", handleDownload)
+		}
+		group.GET(prefixPath+"/dir/list/api", handleAPIList(o.enableFilter))
+	} else {
+		r.GET(prefixPath+"/dir/list", handleList(prefixPath, o))
+		if o.enableDownload {
+			r.GET(prefixPath+"/dir/file/download", handleDownload)
+		}
+		r.GET(prefixPath+"/dir/list/api", handleAPIList(o.enableFilter))
 	}
-	r.GET(prefixPath+"/dir/list/api", handleAPIList(o.enableFilter))
 }
 
 // nolint
