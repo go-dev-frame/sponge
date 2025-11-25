@@ -15,70 +15,35 @@
 
 </div>
 
+---
+
 <br>
 
 ### Introduction
 
-**Sponge** is a powerful and easy-to-use Go development framework. It integrates **automatic code generation**, **Web frameworks (Gin)**, and **microservice frameworks (gRPC)**, covering the full lifecycle from project generation, development, and testing to API documentation and deployment.
+**Sponge** is a powerful and easy-to-use **Go development framework**. Built on the core philosophy of **"Definition is Code"**, it aims to reshape the backend development experience through automatic generation technology, unleashing productivity and boosting development efficiency.
 
-Sponge's core philosophy is **"Definition is Code"**. By parsing SQL, Protobuf, and JSON configuration files, it generates modular backend service code. You can flexibly combine these code modules like building blocks to quickly construct various backend systems ranging from monolithic applications to microservice clusters (including RESTful API, gRPC, HTTP+gRPC, gRPC Gateway, etc.).
+Sponge deeply integrates a **code generation engine**, **Gin (Web framework)**, and **gRPC (microservice framework)**, covering the full software lifecycle from project generation, development, and testing to API documentation and deployment.
 
-Sponge aims to improve the development efficiency and code quality of backend services. Through a **low-code** approach, it helps developers completely eliminate tedious repetitive work (such as CRUD, routing configuration, and project structure setup), allowing them to focus on the implementation of core business logic.
+**Core Features:**
+
+*   **Definition-Driven Development**: Automatically parses SQL, Protobuf, and JSON configuration files to generate high-quality modular code.
+*   **LEGO-style Assembly**: Flexibly combines code modules in a loosely coupled manner, supporting the rapid construction of **monolithic applications**, **microservice clusters**, and **gateway services**, including `RESTful API`, `gRPC`, `HTTP+gRPC`, `gRPC Gateway`, etc.
+*   **Low Code, High Efficiency**: Completely eliminates tedious repetitive work such as CRUD, routing configuration, and service governance. Developers only need to focus on core business logic to deliver standardized, high-quality backend services.
 
 <br>
 
 ### Why Choose Sponge?
 
-- **Extreme Development Efficiency**: Automatically generates CRUD APIs, project scaffolding, and extensive boilerplate code, letting developers say goodbye to repetitive labor.
-- **Out of the Box**: Provides a complete development toolchain (Generate → Develop → Test → Deploy → Monitor), eliminating the need to piece together fragmented tools.
+- **Extreme Development Efficiency**: One-click generation of complete, production-ready backend services (Zero-Code), including CRUD, routing, documentation, and service framework code, multiplying development efficiency.
+- **Out-of-the-box Toolchain**: Provides a complete development toolchain (Generation → Business Logic → Testing → Deployment → Monitoring), eliminating the need to piece together fragmented tools.
 - **Industry Best Practices**: Built on the mainstream Go community tech stack (Gin/GORM/gRPC/Protobuf, etc.), with a standardized architecture to reduce technology selection risks.
-* **Flexible and Extensible**: Supports custom templates, not limited to Go; can extend to generate frontend code, test scripts, and arbitrary code.
-- **Gentle Learning Curve**: Low entry barrier and easy to get started.
-- **Suitable for Team Collaboration**: Unified project structure improves team collaboration efficiency and code maintainability.
-- **Fusion of Low-Code and AI**:
-    - **Sponge** handles the generation of standardized infrastructure code (APIs, data layer, service frameworks).
-    - **AI Models** perceive the project context and assist in generating core business logic, achieving "Automated Infrastructure, Intelligent Business".
-
-<br>
-
-### Key Features
-
-<details>
-<summary> <b>One-click Generation of Complete Backend Services (Zero-Code).</b> </summary>
-
-> For scenarios requiring only basic `CRUD` capabilities (Web, gRPC, or HTTP+gRPC), **no Go code needs to be written**. simply connect to a database (MySQL, MongoDB, PostgreSQL, SQLite) to generate a complete backend service with one click, supporting direct deployment to Linux, Docker, or Kubernetes.
-</details>
-
-<details>
-<summary> <b>Protocol-Driven Development for General Backend Services, from Definition to Implementation in One Step.</b> </summary>
-
-> For general `Web`, `gRPC`, `HTTP+gRPC`, or `gRPC Gateway` services, a standardized development process is adopted:
-> 1. **Define Data**: Design SQL DDL.
-> 2. **Define Interface**: Write Protobuf IDL.
-> 3. **Generate Code**: Sponge automatically generates CRUD, routing, documentation, and glue code.
-> 4. **Fill Business**: Use Sponge's built-in AI model or manually complete the core logic.
-
-</details>
-
-<details>
-<summary> <b>Visual Code Generation, Simple and Easy to Use.</b> </summary>
-
-> Say goodbye to complex command-line arguments. Sponge provides an intuitive Web UI, allowing you to complete code generation through simple form configurations, lowering the barrier to entry.
-</details>
-
-<details>
-<summary> <b>AI Collaborative Development.</b> </summary>
-
-> Sponge integrates with AI models like DeepSeek, ChatGPT, and Gemini. Sponge handles the tedious engineering structure and standardized code, while the AI model focuses on understanding requirements and generating specific business logic code, significantly improving code consistency and R&D speed.
-
-</details>
-
-<details>
-<summary> <b>Support for Custom Templates, Flexible Extension.</b> </summary>
-
-> Not limited to the Go language, you can generate frontend code, test scripts, CI/CD configurations, and any text file through custom templates to meet specific team engineering needs.
-
-</details>
+- **Extremely Low Learning Curve**: Easy to get started and beginner-friendly, while also meeting the customization needs of senior developers.
+- **Ideal for Team Collaboration**: Unifies project structure, improving team collaboration efficiency and code maintainability.
+* **Flexible and Extensible**: Supports custom templates, not limited to Go; capable of extending to frontend, test scripts, and other arbitrary code generation.
+- **AI-Driven Development (AI-Native)**:
+   - **Sponge:** automatically builds standardized infrastructure (API, data layer, service framework).
+   - **AI Assistant:** analyzes project context and generates code intelligently fill in core business logic based on project context, achieving "Infrastructure Automation, Business Intelligence".
 
 <br>
 
@@ -86,11 +51,11 @@ Sponge aims to improve the development efficiency and code quality of backend se
 
 Sponge is suitable for building high-performance, maintainable backend systems, specifically for:
 
-- **Rapid development of RESTful API services**
-- **Building large-scale microservice architectures**
-- **Cloud-native application development**
-- **Rapid refactoring and migration of legacy projects**
-- **Standardized engineering templates for Go beginners or teams**
+- **Rapid development of RESTful API services.**
+- **Building large-scale microservice architectures.**
+- **Cloud-native application development.**
+- **Rapid refactoring and migration of legacy projects.**
+- **Standardized engineering templates for Go beginners or teams.**
 
 <br>
 
@@ -133,13 +98,14 @@ No installation required, experience the code generation feature directly in you
 
 Sponge follows the "batteries included" principle, integrating 30+ mainstream Go ecosystem components, loaded on demand:
 
-| Category | Component                                                    |
-| :--- |:------------------------------------------------------|
-| **Frameworks** | Gin, gRPC                                             |
-| **Database** | GORM (MySQL, PostgreSQL, SQLite, etc.), MongoDB            |
-| **Cache/Messaging** | Redis, Kafka, RabbitMQ                                |
-| **Service Governance** | Etcd, Consul, Nacos, Jaeger, Prometheus, OpenTelemetry               |
-| **Others** | DTM (Distributed Transaction), WebSocket, Swagger, PProf |
+| Category               | Component                                                |
+|:-----------------------|:---------------------------------------------------------|
+| **Frameworks**         | Gin, gRPC                                                |
+| **Database**           | GORM (MySQL, PostgreSQL, SQLite, etc.), MongoDB          |
+| **Cache/Messaging**    | Redis, Kafka, RabbitMQ                                   |
+| **Service Governance** | Etcd, Consul, Nacos, Jaeger, Prometheus, OpenTelemetry   |
+| **Others**             | DTM (Distributed Transaction), WebSocket, Swagger, PProf |
+| ...                    | ...                                                      |
 
 👉 [**View the complete list of tech stacks and components**](https://go-sponge.com/component/).
 
