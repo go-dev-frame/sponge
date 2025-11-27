@@ -1,9 +1,5 @@
 ## [English](../README.md) | 简体中文
 
----
-
-<br>
-
 ### 简介
 
 **Sponge** 是一款强大且易用的 **Go 开发框架**。它基于 **"Definition is Code" (定义即代码)** 的核心理念，致力于通过自动生成技术重塑后端开发体验，解放生产力，大幅提升开发效率。
@@ -12,20 +8,20 @@ Sponge 深度集成了 **代码生成引擎**、 **Gin (Web 框架)** 与 **gRPC
 
 **核心特性：**
 
-*   **定义驱动开发**：自动解析 SQL、Protobuf 和 JSON 配置文件，生成高质量的模块化代码。
-*   **积木式组装**：以松耦合的方式灵活组合代码模块，支持快速构建 **单体应用**、**微服务集群** 及 **网关服务**，包括 `RESTful API`、`gRPC`、`HTTP+gRPC`、`gRPC Gateway` 等。
-*   **低代码，高效率**：彻底消除 CRUD、路由配置、服务治理等繁琐的重复性工作。开发者只需专注于核心业务逻辑，即可交付标准化、高质量的后端服务。
+-   **定义驱动开发**：自动解析 SQL、Protobuf 和 JSON 配置文件，生成高质量的模块化代码。
+-   **积木式组装**：以松耦合的方式灵活组合代码模块，支持快速构建 **单体应用**、**微服务集群** 及 **网关服务**，包括 `RESTful API`、`gRPC`、`HTTP+gRPC`、`gRPC Gateway` 等。
+-   **低代码，高效率**：彻底消除从底层框架搭建、CRUD开发到路由配置、服务治理等一系列繁琐的重复性工作。开发者只需专注于核心业务逻辑，即可快速交付标准化、高质量的后端服务。
 
 <br>
 
 ### 为什么选择 Sponge？
 
-- **极致的开发效率**：一键生成可直接线上部署的完整后端服务 (Zero-Code)，包括 CRUD、路由、文档及服务框架代码等，开发效率成倍提升。
+- **极致的开发效率**：一键生成可直接线上部署的完整后端服务，包括 CRUD、路由、文档及服务框架代码等，开发效率成倍提升。
 - **开箱即用的工具链**：提供完整的开发工具链（生成 → 填充业务 → 测试 → 部署 → 监控），无需拼凑碎片化工具。  
 - **行业最佳实践**：基于 Go 社区主流技术栈（Gin/GORM/gRPC/Protobuf 等）构建，架构规范，降低技术选型风险。 
 - **极低的学习门槛**：上手简单，对新手友好，同时满足资深开发者的定制需求。
 - **适合团队协作**：统一项目结构，提升团队协作效率和代码可维护性。
-* **灵活可扩展**：支持自定义模板，不仅限于 Go，还可扩展前端、测试脚本等任意代码生成。
+- **灵活可扩展**：支持自定义模板，不仅限于 Go，还可扩展前端、测试脚本等任意代码生成。
 - **AI 驱动开发 (AI-Native)**：
     - **Sponge：** 自动构建标准化的基础设施（API、数据层、服务框架）。
     - **AI 助手：** 基于项目上下文，智能填充核心业务逻辑，实现“基建自动化，业务智能化”。
@@ -36,11 +32,11 @@ Sponge 深度集成了 **代码生成引擎**、 **Gin (Web 框架)** 与 **gRPC
 
 Sponge 适用于构建高性能、可维护的后端系统，特别适合：
 
-- **快速开发 RESTful API 服务。**
-- **构建大规模微服务架构。**
-- **云原生应用开发。**
-- **旧有项目的快速重构与迁移。**
-- **Go 语言初学者或团队的标准化工程模板。**
+- 快速开发 RESTful API 服务。
+- 构建大规模微服务架构。
+- 云原生应用开发。
+- 旧有项目的快速重构与迁移。
+- Go 语言初学者或团队的标准化工程模板。
 
 <br>
 
@@ -67,7 +63,7 @@ Sponge 适用于构建高性能、可维护的后端系统，特别适合：
 3. **示例：基于 SQL 一键生成 Web 服务后端代码**
 
    <p align="center">
-   <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-ui.png">
+   <img width="750px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-ui.png">
    </p>
 
    - 操作流程：
@@ -105,7 +101,7 @@ Sponge 提供多种代码生成引擎，支持**内置模板**、**自定义模�
 1. 基于**内置模板**的代码生成引擎，如下图所示：
 
 <p align="center">
-<img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-framework.png">
+<img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-framework.png">
 </p>
 
 <br>
@@ -113,7 +109,7 @@ Sponge 提供多种代码生成引擎，支持**内置模板**、**自定义模�
 2. 基于**自定义模板**代码生成引擎，如下图所示：
 
 <p align="center">
-<img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/template-framework.png">
+<img width="600px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/template-framework.png">
 </p>
 
 <br>
@@ -121,17 +117,17 @@ Sponge 提供多种代码生成引擎，支持**内置模板**、**自定义模�
 3. **AI 辅助业务逻辑**代码生成引擎，如下图所示：
 
 <p align="center">
-<img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/ai-assistant-framework.png">
+<img width="600px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/ai-assistant-framework.png">
 </p>
 
 <br>
 
 #### 微服务架构
 
-Sponge 生成的代码遵循典型的分层架构，内置服务治理能力，结构清晰，易于维护。一个现代的微服务框架结构如下图所示：
+Sponge 生成的代码遵循典型的分层架构，内置服务治理能力，结构清晰，易于维护。Sponge 的微服务框架结构如下图所示：
 
 <p align="center">
-<img width="1000px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/microservices-framework.png">
+<img width="750px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/microservices-framework.png">
 </p>
 
 <br>
@@ -141,10 +137,14 @@ Sponge 生成的代码遵循典型的分层架构，内置服务治理能力，�
 基于 50 并发、100 万次请求的测试结果显示，Sponge 生成的服务具有优异的性能表现：
 
 1. **HTTP 服务**
-![http-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/http-server.png)
+   <p align="center">
+   <img width="900px" src="https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/http-server.png">
+   </p>
 
 2. **gRPC 服务**
-![grpc-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/grpc-server.png)
+   <p align="center">
+   <img width="900px" src="https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/grpc-server.png">
+   </p>
 
 👉 [**查看详细测试代码与环境**](https://github.com/zhufuyi/microservices_framework_benchmark)。
 

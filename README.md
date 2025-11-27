@@ -17,8 +17,6 @@
 
 ---
 
-<br>
-
 ### Introduction
 
 **Sponge** is a powerful and easy-to-use **Go development framework**. Built on the core philosophy of **"Definition is Code"**, it aims to reshape the backend development experience through automatic generation technology, unleashing productivity and boosting development efficiency.
@@ -27,20 +25,20 @@ Sponge deeply integrates a **code generation engine**, **Gin (Web framework)**, 
 
 **Core Features:**
 
-*   **Definition-Driven Development**: Automatically parses SQL, Protobuf, and JSON configuration files to generate high-quality modular code.
-*   **LEGO-style Assembly**: Flexibly combines code modules in a loosely coupled manner, supporting the rapid construction of **monolithic applications**, **microservice clusters**, and **gateway services**, including `RESTful API`, `gRPC`, `HTTP+gRPC`, `gRPC Gateway`, etc.
-*   **Low Code, High Efficiency**: Completely eliminates tedious repetitive work such as CRUD, routing configuration, and service governance. Developers only need to focus on core business logic to deliver standardized, high-quality backend services.
+-   **Definition-Driven Development**: Automatically parses SQL, Protobuf, and JSON configuration files to generate high-quality modular code.
+-   **LEGO-style Assembly**: Flexibly combines code modules in a loosely coupled manner, supporting the rapid construction of **monolithic applications**, **microservice clusters**, and **gateway services**, including `RESTful API`, `gRPC`, `HTTP+gRPC`, `gRPC Gateway`, etc.
+-   **Low Code, High Efficiency**: Eliminate the tedious, repetitive tasks of building underlying frameworks, developing CRUD operations, and configuring routing and governance. This allows developers to focus solely on core business logic and rapidly deliver standardized, high-quality backend services.
 
 <br>
 
 ### Why Choose Sponge?
 
-- **Extreme Development Efficiency**: One-click generation of complete, production-ready backend services (Zero-Code), including CRUD, routing, documentation, and service framework code, multiplying development efficiency.
+- **Extreme Development Efficiency**: One-click generation of complete, production-ready backend services, including CRUD, routing, documentation, and service framework code, multiplying development efficiency.
 - **Out-of-the-box Toolchain**: Provides a complete development toolchain (Generation → Business Logic → Testing → Deployment → Monitoring), eliminating the need to piece together fragmented tools.
 - **Industry Best Practices**: Built on the mainstream Go community tech stack (Gin/GORM/gRPC/Protobuf, etc.), with a standardized architecture to reduce technology selection risks.
 - **Extremely Low Learning Curve**: Easy to get started and beginner-friendly, while also meeting the customization needs of senior developers.
 - **Ideal for Team Collaboration**: Unifies project structure, improving team collaboration efficiency and code maintainability.
-* **Flexible and Extensible**: Supports custom templates, not limited to Go; capable of extending to frontend, test scripts, and other arbitrary code generation.
+- **Flexible and Extensible**: Supports custom templates, not limited to Go; capable of extending to frontend, test scripts, and other arbitrary code generation.
 - **AI-Driven Development (AI-Native)**:
    - **Sponge:** automatically builds standardized infrastructure (API, data layer, service framework).
    - **AI Assistant:** analyzes project context and generates code intelligently fill in core business logic based on project context, achieving "Infrastructure Automation, Business Intelligence".
@@ -51,11 +49,11 @@ Sponge deeply integrates a **code generation engine**, **Gin (Web framework)**, 
 
 Sponge is suitable for building high-performance, maintainable backend systems, specifically for:
 
-- **Rapid development of RESTful API services.**
-- **Building large-scale microservice architectures.**
-- **Cloud-native application development.**
-- **Rapid refactoring and migration of legacy projects.**
-- **Standardized engineering templates for Go beginners or teams.**
+- Rapid development of RESTful API services.
+- Building large-scale microservice architectures.
+- Cloud-native application development.
+- Rapid refactoring and migration of legacy projects.
+- Standardized engineering templates for Go beginners or teams.
 
 <br>
 
@@ -82,7 +80,7 @@ No installation required, experience the code generation feature directly in you
 3. **Example: One-click Generation of Web Service Backend Code Based on SQL**
 
    <p align="center">
-   <img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_sponge-ui.png">
+   <img width="750px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_sponge-ui.png">
    </p>
 
     - Operation Process:
@@ -120,7 +118,7 @@ Sponge provides multiple code generation engines, supporting **built-in template
 1. Code generation engine based on **built-in templates**, as shown below:
 
 <p align="center">
-<img width="1500px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-framework.png">
+<img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/sponge-framework.png">
 </p>
 
 <br>
@@ -128,7 +126,7 @@ Sponge provides multiple code generation engines, supporting **built-in template
 2. Code generation engine based on **custom templates**, as shown below:
 
 <p align="center">
-<img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/template-framework.png">
+<img width="600px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/template-framework.png">
 </p>
 
 <br>
@@ -136,17 +134,17 @@ Sponge provides multiple code generation engines, supporting **built-in template
 3. Code generation engine based on **AI-assisted business logic**, as shown below:
 
 <p align="center">
-<img width="1200px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/ai-assistant-framework.png">
+<img width="600px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/ai-assistant-framework.png">
 </p>
 
 <br>
 
 #### Microservice Architecture
 
-The code generated by Sponge follows a typical layered architecture with built-in service governance capabilities. The structure is clear and easy to maintain. A modern microservice framework structure is shown below:
+The code generated by Sponge follows a typical layered architecture with built-in service governance capabilities. The structure is clear and easy to maintain. The microservice framework structure of Sponge is shown below:
 
 <p align="center">
-<img width="1000px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_microservices-framework.png">
+<img width="750px" src="https://raw.githubusercontent.com/go-dev-frame/sponge/main/assets/en_microservices-framework.png">
 </p>
 
 <br>
@@ -156,10 +154,14 @@ The code generated by Sponge follows a typical layered architecture with built-i
 Based on tests with 50 concurrency and 1 million requests, services generated by Sponge demonstrate excellent performance:
 
 1. **HTTP Service**
-   ![http-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/http-server.png)
+   <p align="center">
+   <img width="900px" src="https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/http-server.png">
+   </p>
 
 2. **gRPC Service**
-   ![grpc-server](https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/grpc-server.png)
+   <p align="center">
+   <img width="900px" src="https://raw.githubusercontent.com/zhufuyi/microservices_framework_benchmark/main/test/assets/grpc-server.png">
+   </p>
 
 👉 [**View detailed test code and environment**](https://github.com/zhufuyi/microservices_framework_benchmark).
 
