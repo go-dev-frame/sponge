@@ -469,6 +469,10 @@ func (g *rpcGenerator) addFields(r replacer.Replacer) []replacer.Field {
 			New: getLocalGoVersion(),
 		},
 		{
+			Old: defaultImageGoModVersion,
+			New: extractImageGoVersion(),
+		},
+		{
 			Old: "_userExampleNO       = 2",
 			New: fmt.Sprintf("_userExampleNO       = %d", rand.Intn(99)+1),
 		},

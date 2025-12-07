@@ -271,6 +271,10 @@ func (g *rpcPbGenerator) addFields(r replacer.Replacer) []replacer.Field {
 			New: getLocalGoVersion(),
 		},
 		{
+			Old: defaultImageGoModVersion,
+			New: extractImageGoVersion(),
+		},
+		{
 			Old: "serverNameExample",
 			New: g.serverName,
 		},

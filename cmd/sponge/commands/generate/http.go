@@ -450,6 +450,10 @@ func (g *httpGenerator) addFields(r replacer.Replacer) []replacer.Field {
 			New: getLocalGoVersion(),
 		},
 		{
+			Old: defaultImageGoModVersion,
+			New: extractImageGoVersion(),
+		},
+		{
 			Old: "userExampleNO       = 1",
 			New: fmt.Sprintf("userExampleNO = %d", rand.Intn(99)+1),
 		},

@@ -31,12 +31,6 @@ EXPOSE 8282 8283`
 FROM alpine:latest
 MAINTAINER zhufuyi "g.zhufuyi@gmail.com"
 
-# set the time zone to Shanghai
-RUN apk add tzdata  \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
-    && apk del tzdata
-
 # add curl, used for http service checking, can be installed without it if deployed in k8s
 RUN apk add curl
 
@@ -61,12 +55,6 @@ RUN cd $GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-health-probe@v0.4.12 \
 # building images with binary
 FROM alpine:latest
 MAINTAINER zhufuyi "g.zhufuyi@gmail.com"
-
-# set the time zone to Shanghai
-RUN apk add tzdata  \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
-    && apk del tzdata
 
 # add grpc_health_probe for health check of grpc services
 COPY --from=build /grpc_health_probe /bin/grpc_health_probe
