@@ -30,9 +30,9 @@ echo "docker build --force-rm -f ${DOCKERFILE} -t ${IMAGE_NAME_TAG} ${DOCKERFILE
 docker build --force-rm -f ${DOCKERFILE} -t ${IMAGE_NAME_TAG} ${DOCKERFILE_PATH}
 rm -rf ${DOCKERFILE_PATH}/${serverName}.tar.gz
 # delete none image
-noneImages=$(docker images | grep "<none>" | awk '{print $3}')
+noneImages=$(docker images | grep "${IMAGE_NAME}" | grep "<none>" | awk '{print $3}')
 if [ "X${noneImages}" != "X" ]; then
-  docker rmi ${noneImages} > /dev/null
+  docker rmi ${noneImages} > /dev/null 2>&1 || true
 fi
 exit 0
 

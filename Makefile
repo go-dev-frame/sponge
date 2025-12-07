@@ -134,18 +134,30 @@ image-build-local: build
 .PHONY: image-build
 # Build image for remote repositories, use binary files to build, e.g. make image-build REPO_HOST=addr TAG=latest
 image-build:
+	@if [ -z "$(REPO_HOST)" ]; then \
+		echo "ERROR: REPO_HOST is required. Usage: make image-build REPO_HOST=xxx"; \
+		exit 1; \
+	fi
 	@bash scripts/image-build.sh $(REPO_HOST) $(TAG)
 
 
 .PHONY: image-build2
 # Build image for remote repositories, phase II build, e.g. make image-build2 REPO_HOST=addr TAG=latest
 image-build2:
+	@if [ -z "$(REPO_HOST)" ]; then \
+		echo "ERROR: REPO_HOST is required. Usage: make image-build2 REPO_HOST=xxx"; \
+		exit 1; \
+	fi
 	@bash scripts/image-build2.sh $(REPO_HOST) $(TAG)
 
 
 .PHONY: image-push
 # Push docker image to remote repositories, e.g. make image-push REPO_HOST=addr TAG=latest
 image-push:
+	@if [ -z "$(REPO_HOST)" ]; then \
+		echo "ERROR: REPO_HOST is required. Usage: make image-push REPO_HOST=xxx TAG=latest"; \
+		exit 1; \
+	fi
 	@bash scripts/image-push.sh $(REPO_HOST) $(TAG)
 
 

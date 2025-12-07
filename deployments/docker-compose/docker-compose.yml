@@ -8,6 +8,9 @@ services:
     command: ["./serverNameExample", "-c", "/app/configs/serverNameExample.yml"]
     volumes:
       - $PWD/configs:/app/configs
+      - /etc/localtime:/etc/localtime:ro  # mount the local time file
+    #environment:
+    #  - TZ=Asia/Shanghai
 # todo generate docker-compose.yml code for http or grpc here
 # delete the templates code start
     ports:

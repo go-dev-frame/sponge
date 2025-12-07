@@ -39,9 +39,9 @@ checkResult $?
 rmFile perftest
 
 # delete none image
-noneImages=$(docker images --filter "dangling=true" -q)
+noneImages=$(docker images --filter "dangling=true" -q | grep "${zhufuyi/perftest}")
 if [ -n "$noneImages" ]; then
-    docker rmi $noneImages > /dev/null
+    docker rmi $noneImages > /dev/null 2>&1 || true
 fi
 
 # push image to docker hub

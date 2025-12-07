@@ -1,12 +1,6 @@
 FROM alpine:latest
 MAINTAINER zhufuyi "g.zhufuyi@gmail.com"
 
-# set the time zone to Shanghai
-RUN apk add tzdata  \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
-    && apk del tzdata
-
 # todo generate dockerfile code for http or grpc here
 # delete the templates code start
 

@@ -31,7 +31,13 @@ spec:
             - name: server-name-example-vl
               mountPath: /app/configs/
               readOnly: true
-# todo generate k8s-deployment.yml code for http or grpc here
+            - name: host-timezone
+              mountPath: /etc/localtime
+              readOnly: true
+          #env:
+          #  - name: TZ
+          #    value: "Asia/Shanghai"
+          # todo generate k8s-deployment.yml code for http or grpc here
 # delete the templates code start
           ports:
             - name: http-port
@@ -73,3 +79,7 @@ spec:
         - name: server-name-example-vl
           configMap:
             name: server-name-example-config
+        - name: host-timezone
+          hostPath:
+            path: /etc/localtime
+            type: File

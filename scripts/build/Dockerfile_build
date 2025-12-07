@@ -28,12 +28,6 @@ RUN cd $GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-health-probe@v0.4.12 \
 FROM alpine:latest
 MAINTAINER zhufuyi "g.zhufuyi@gmail.com"
 
-# set the time zone to Shanghai
-RUN apk add tzdata  \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
-    && apk del tzdata
-
 # add curl, used in the http service check, if deployed in k8s, can be installed without
 RUN apk add curl
 # add grpc_health_probe for health check of grpc service

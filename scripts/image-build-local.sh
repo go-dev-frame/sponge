@@ -48,8 +48,8 @@ if [ -d "${DOCKERFILE_PATH}/configs" ]; then
 fi
 
 # delete none image
-noneImages=$(docker images | grep "<none>" | awk '{print $3}')
+noneImages=$(docker images | grep "${IMAGE_NAME}" | grep "<none>" | awk '{print $3}')
 if [ "X${noneImages}" != "X" ]; then
-  docker rmi ${noneImages} > /dev/null
+  docker rmi ${noneImages} > /dev/null 2>&1 || true
 fi
 exit 0
