@@ -140,6 +140,10 @@ func main() {
         "your-email@example.com", // 你的邮箱，用于接收 Let's Encrypt 通知
         // 可选：开启 HTTP -> HTTPS 自动重定向 (默认监听 :80)
         //httpsrv.WithTLSEncryptEnableRedirect(),
+        // 可选：重定向到非标准 HTTPS 端口
+        //httpsrv.WithTLSEncryptRedirectHTTPSPort(8443),
+        // 可选：为证书白名单添加更多域名
+        //httpsrv.WithTLSEncryptDomains("www.your-domain.com"),
         // 可选：自定义证书缓存目录
         //httpsrv.WithTLSEncryptCacheDir("certs/encrypt"),
     )
