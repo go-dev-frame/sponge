@@ -142,6 +142,10 @@ func main() {
         "your-email@example.com", // Your email for Let's Encrypt notifications
         // Optional: Enable HTTP -> HTTPS automatic redirection (listens on :80 by default)
         //httpsrv.WithTLSEncryptEnableRedirect(),
+        // Optional: Redirect to a non-standard HTTPS port
+        //httpsrv.WithTLSEncryptRedirectHTTPSPort(8443),
+        // Optional: Add more domains to the certificate whitelist
+        //httpsrv.WithTLSEncryptDomains("www.your-domain.com"),
         // Optional: Custom certificate cache directory
         //httpsrv.WithTLSEncryptCacheDir("certs/encrypt"),
     )
