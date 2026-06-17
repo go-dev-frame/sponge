@@ -14,13 +14,14 @@ func TestNewConsoleExporter(t *testing.T) {
 }
 
 func TestNewFileExporter(t *testing.T) {
+	t.Chdir(t.TempDir())
+
 	exporter, file, err := NewFileExporter("demo")
 	if err != nil {
 		t.Fatal(err)
 	}
 	assert.NotNil(t, exporter)
 	_ = file.Close()
-	_ = os.RemoveAll("demo")
 
 	exporter, file, err = NewFileExporter("")
 	if err != nil {
@@ -28,15 +29,10 @@ func TestNewFileExporter(t *testing.T) {
 	}
 	assert.NotNil(t, exporter)
 	_ = file.Close()
-	_ = os.RemoveAll("traces.json")
 
-	defer func() {
-		recover()
-	}()
-	_, _, err = NewFileExporter("\\\\")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Panics(t, func() {
+		_, _, _ = NewFileExporter(t.TempDir())
+	})
 }
 
 func Test_newExporter(t *testing.T) {

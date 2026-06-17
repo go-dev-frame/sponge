@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	dbFile := "test_sqlite.db"
+	dbFile := filepath.Join(t.TempDir(), "test_sqlite.db")
 	db, err := Init(dbFile)
 	if err != nil {
 		// ignore test error about not being able to connect to real sqlite
