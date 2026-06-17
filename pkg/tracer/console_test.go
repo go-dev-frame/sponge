@@ -14,7 +14,18 @@ func TestNewConsoleExporter(t *testing.T) {
 }
 
 func TestNewFileExporter(t *testing.T) {
-	t.Chdir(t.TempDir())
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := os.Chdir(wd); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	exporter, file, err := NewFileExporter("demo")
 	if err != nil {
