@@ -1,4 +1,4 @@
-Requires [Go 1.23+](https://go.dev/doc/install) version.
+Requires [Go 1.27.1+](https://go.dev/doc/install) version.
 
 <br>
 

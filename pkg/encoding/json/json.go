@@ -53,7 +53,7 @@ func (codec) Unmarshal(data []byte, v interface{}) error {
 		return UnmarshalOptions.Unmarshal(data, m)
 	default:
 		rv := reflect.ValueOf(v)
-		for rv := rv; rv.Kind() == reflect.Ptr; {
+		for rv := rv; rv.Kind() == reflect.Pointer; {
 			if rv.IsNil() {
 				rv.Set(reflect.New(rv.Type().Elem()))
 			}

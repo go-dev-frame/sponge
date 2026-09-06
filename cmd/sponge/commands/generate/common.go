@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	defaultGoModVersion      = "go 1.23.0"
-	defaultImageGoModVersion = "golang:1.23-alpine"
+	defaultGoModVersion      = "go 1.27.1"
+	defaultImageGoModVersion = "golang:1.27.1-alpine"
 
 	// TplNameSponge name of the template
 	TplNameSponge = "sponge"
@@ -856,7 +856,7 @@ func getLocalGoVersion() string {
 
 func extractImageGoVersion() string {
 	goVersion := getLocalGoVersion()
-	re := regexp.MustCompile(`go\s+(\d+\.\d+)\.\d+`)
+	re := regexp.MustCompile(`go\s+(\d+\.\d+(?:\.\d+)?)`)
 	matches := re.FindStringSubmatch(goVersion)
 	if len(matches) > 1 {
 		return fmt.Sprintf("golang:%s-alpine", matches[1])

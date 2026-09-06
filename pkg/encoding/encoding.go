@@ -111,7 +111,7 @@ func Unmarshal(e Encoding, data []byte, v interface{}) (err error) {
 
 func isPointer(data interface{}) bool {
 	switch reflect.ValueOf(data).Kind() {
-	case reflect.Ptr, reflect.Interface:
+	case reflect.Pointer, reflect.Interface:
 		return true
 	default:
 		return false

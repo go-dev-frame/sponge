@@ -33,7 +33,7 @@ func (v *CustomValidator) ValidateStruct(obj interface{}) error {
 	}
 
 	val := reflect.ValueOf(obj)
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		val = val.Elem()
 	}
 
@@ -43,7 +43,7 @@ func (v *CustomValidator) ValidateStruct(obj interface{}) error {
 			return err
 		}
 
-	case reflect.Ptr:
+	case reflect.Pointer:
 		// pointer type: if nil, no validation required; otherwise recursive validation after dereference
 		if val.IsNil() {
 			return nil

@@ -1,276 +1,242 @@
-# See the file `https://github.com/golangci/golangci-lint/blob/master/.golangci.yml` to have a list of all available configuration options.
-
+version: "2"
+run:
+  timeout: 5m
+  tests: false
 linters:
-  disable-all: true
-  # This list of linters is not a recommendation (same thing for all this configuration file).
-  # We intentionally use a limited set of linters.
-  # See the comment on top of this file.
+  default: none
   enable:
-    - revive
-    - goimports
-    - unused
+    - copyloopvar
     - dogsled
     - errcheck
     - goconst
     - gocyclo
-    - gosimple
+    - goprintffuncname
     - govet
     - lll
     - misspell
-    - unconvert
-    - whitespace
+    - revive
     - staticcheck
-    - goprintffuncname
-    - copyloopvar
-
-    #- gofmt
-    #- stylecheck
-    #- bodyclose
-    #- intrange
-    #- gochecknoinits
-    #- gocritic
-    #- errorlint
-    #- dupl
-    #- depguard
-    #- ineffassign
-    #- gosec
-    #- unparam
-    #- funlen
-    #- gocheckcompilerdirectives
-    #- godox
-    #- mnd
-    #- nakedret
-    #- noctx
-    #- nolintlint
-    #- testifylint
-
-
-linters-settings:
-  goimports:
-    local-prefixes: github.com/go-dev-frame/sponge
-  gofmt:
-    rewrite-rules:
-      - pattern: 'interface{}'
-        replacement: 'any'
-  depguard:
+    - unconvert
+    - unused
+    - whitespace
+  settings:
+    depguard:
+      rules:
+        logger:
+          deny:
+            - pkg: github.com/pkg/errors
+              desc: Should be replaced by standard lib errors package.
+    dogsled:
+      max-blank-identifiers: 2
+    dupl:
+      threshold: 100
+    errorlint:
+      asserts: false
+    funlen:
+      lines: -1
+      statements: 50
+    goconst:
+      min-len: 4
+      min-occurrences: 4
+      # Keep v1 behavior for calls and literal tables used by the generator.
+      exclude-types:
+        - Call
+        - CompositeLit
+    gocritic:
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 20
+    godox:
+      keywords:
+        - FIXME
+    govet:
+      enable:
+        - nilness
+        - shadow
+      settings:
+        printf:
+          funcs:
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+            - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+    lll:
+      line-length: 200
+    misspell:
+      locale: US
+      ignore-rules:
+        - importas
+    mnd:
+      checks:
+        - argument
+        - case
+        - condition
+        - return
+      ignored-numbers:
+        - "0"
+        - "1"
+        - "2"
+        - "3"
+      ignored-functions:
+        - strings.SplitN
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+    revive:
+      rules:
+        - name: unexported-return
+          disabled: true
+        - name: indent-error-flow
+        - name: argument-limit
+          arguments:
+            - 8
+        - name: atomic
+        - name: bare-return
+        - name: blank-imports
+        - name: bool-literal-in-expr
+        - name: call-to-gc
+        - name: confusing-naming
+        - name: confusing-results
+        - name: constant-logical-expr
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: deep-exit
+        - name: defer
+        - name: dot-imports
+        - name: duplicated-imports
+        - name: early-return
+        - name: empty-block
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: errorf
+        - name: function-result-limit
+          arguments:
+            - 3
+        - name: identical-branches
+        - name: if-return
+        - name: import-shadowing
+        - name: increment-decrement
+        - name: modifies-parameter
+        - name: modifies-value-receiver
+        - name: package-comments
+        - name: range
+        - name: range-val-address
+        - name: range-val-in-closure
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: string-of-int
+        - name: struct-tag
+        - name: superfluous-else
+        - name: time-naming
+        - name: unconditional-recursion
+        - name: unexported-naming
+        - name: unnecessary-stmt
+        - name: unreachable-code
+        - name: var-declaration
+        - name: var-naming
+        - name: waitgroup-by-value
+    staticcheck:
+      # Match the previous staticcheck and gosimple linters; omit new style and quick-fix checks.
+      checks:
+        - SA*
+        - S*
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      logger:
-        deny:
-          # logging is allowed only by logutils.Log,
-          #- pkg: "github.com/sirupsen/logrus"
-          #  desc: logging is allowed only by logutils.Log.
-          - pkg: "github.com/pkg/errors"
-            desc: Should be replaced by standard lib errors package.
-          #- pkg: "github.com/instana/testify"
-          #  desc: It's a fork of github.com/stretchr/testify.
-        files:
-          # logrus is allowed to use only in logutils package.
-          #- "!**/pkg/logutils/**.go"
-  dupl:
-    # tokens count to trigger issue, 150 by default
-    threshold: 100
-  dogsled:
-    # checks assignments with too many blank identifiers; default is 2
-    max-blank-identifiers: 2
-  funlen:
-    lines: -1 # the number of lines (code + empty lines) is not a right metric and leads to code without empty line or one-liner.
-    statements: 50
-  goconst:
-    min-len: 4
-    min-occurrences: 4
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-  gocyclo:
-    min-complexity: 20
-  godox:
-    keywords:
-      - FIXME
-  mnd:
-    # don't include the "operation" and "assign"
-    checks:
-      - argument
-      - case
-      - condition
-      - return
-    ignored-numbers:
-      - '0'
-      - '1'
-      - '2'
-      - '3'
-    ignored-functions:
-      - strings.SplitN
-  govet:
-    settings:
-      printf:
-        funcs:
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
-          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-    enable:
-      - nilness
-      - shadow
-  errorlint:
-    asserts: false
-  lll:
-    line-length: 200
-  misspell:
-    locale: US
-    ignore-words:
-      - "importas" # linter name
-  nolintlint:
-    allow-unused: false # report any unused nolint directives
-    require-explanation: true # require an explanation for nolint directives
-    require-specific: true # require nolint directives to be specific about which linter is being skipped
-  revive:
-    rules:
-      - name: unexported-return
-        disabled: true
-      #- name: unused-receiver
-      - name: indent-error-flow
-      #- name: unused-parameter
-      - name: argument-limit
-        arguments: [ 8 ]
-      - name: atomic
-      - name: bare-return
-      - name: blank-imports
-      - name: bool-literal-in-expr
-      - name: call-to-gc
-      - name: confusing-naming
-      - name: confusing-results
-      - name: constant-logical-expr
-      - name: context-as-argument
-      - name: context-keys-type
-      - name: deep-exit
-      - name: defer
-      - name: dot-imports
-      - name: duplicated-imports
-      - name: early-return
-      - name: empty-block
-      #- name: empty-lines
-      - name: error-naming
-      - name: error-return
-      - name: error-strings
-      - name: errorf
-      - name: function-result-limit
-        arguments: [ 3 ]
-      - name: identical-branches
-      - name: if-return
-      - name: import-shadowing
-      - name: increment-decrement
-      - name: modifies-parameter
-      - name: modifies-value-receiver
-      - name: package-comments
-      - name: range
-      - name: range-val-address
-      - name: range-val-in-closure
-      - name: receiver-naming
-      - name: redefines-builtin-id
-      - name: string-of-int
-      - name: struct-tag
-      - name: superfluous-else
-      - name: time-naming
-      - name: unconditional-recursion
-      - name: unexported-naming
-      - name: unnecessary-stmt
-      - name: unreachable-code
-      - name: var-declaration
-      - name: var-naming
-      - name: waitgroup-by-value
-
-issues:
-  exclude-dirs:
-    - docs
-    - api
-
-  exclude-files:
-    - .*_test\.go$
-
-  exclude-rules:
-    - path: (.+)_test\.go
-      linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-
-    # The logic of creating a linter is similar between linters, it's not duplication.
-    #- path: pkg/golinters
-    #  linters:
-    #    - dupl
-
-    # Deprecated configuration options.
-    #- path: pkg/commands/run.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: c.cfg.Run.ShowStats is deprecated: use Output.ShowStats instead."
-
-    # Deprecated linter options.
-    #- path: pkg/golinters/errcheck/errcheck.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: errCfg.Exclude is deprecated: use ExcludeFunctions instead"
-    #- path: pkg/golinters/errcheck/errcheck.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: errCfg.Ignore is deprecated: use ExcludeFunctions instead"
-    #- path: pkg/golinters/govet/govet.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: cfg.CheckShadowing is deprecated: the linter should be enabled inside Enable."
-    #- path: pkg/golinters/godot/godot.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: settings.CheckAll is deprecated: use Scope instead"
-    #- path: pkg/golinters/gci/gci.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: settings.LocalPrefixes is deprecated: use Sections instead."
-    #- path: pkg/golinters/mnd/mnd.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: settings.Settings is deprecated: use root level settings instead."
-    #- path: pkg/golinters/mnd/mnd.go
-    #  linters: [staticcheck]
-    #  text: "SA1019: config.GoMndSettings is deprecated: use MndSettings."
-
-    # Related to `run.go`, it cannot be removed.
-    - path: pkg/golinters/gofumpt/gofumpt.go
-      linters: [staticcheck]
-      text: "SA1019: settings.LangVersion is deprecated: use the global `run.go` instead."
-    - path: pkg/golinters/internal/staticcheck_common.go
-      linters: [staticcheck]
-      text: "SA1019: settings.GoVersion is deprecated: use the global `run.go` instead."
-    - path: pkg/lint/lintersdb/manager.go
-      linters: [staticcheck]
-      text: "SA1019: (.+).(GoVersion|LangVersion) is deprecated: use the global `run.go` instead."
-
-    # Based on existing code, the modifications should be limited to make maintenance easier.
-    - path: pkg/golinters/unused/unused.go
-      linters: [gocritic]
-      text: "rangeValCopy: each iteration copies 160 bytes \\(consider pointers or indexing\\)"
-
-    # Related to file sizes.
-    - path: pkg/goanalysis/runner_loadingpackage.go
-      linters: [gosec]
-      text: "G115: integer overflow conversion uintptr -> int"
-
-    # Related to PID.
-    - path: test/bench/bench_test.go
-      linters: [gosec]
-      text: "G115: integer overflow conversion int -> int32"
-
-    # Related to the result of computation but divided multiple times by 1024.
-    - path: test/bench/bench_test.go
-      linters: [gosec]
-      text: "G115: integer overflow conversion uint64 -> int"
-
-run:
-  # timeout for analysis, e.g. 30s, 5m, default is 1m
-  timeout: 5m
-  # include test files or not, default is true
-  tests: false
-
+      # Service initialization deliberately owns command-line flag parsing.
+      - linters:
+          - revive
+        path: ^cmd/[^/]+/initial/initApp\.go$
+        text: 'deep-exit: calls to flag.Parse'
+      # These public cipher APIs retain their existing ciphertext formats for compatibility.
+      - linters:
+          - staticcheck
+        path: pkg/gocrypto/rsa.go
+        text: 'SA1019: crypto/rsa\.(Encrypt|Decrypt)PKCS1v15'
+      - linters:
+          - staticcheck
+        path: pkg/gocrypto/wcipher/mode.go
+        text: 'SA1019: crypto/cipher\.New(CFBEncrypter|CFBDecrypter|OFB)'
+      # Migrating Director to Rewrite changes forwarding-header behavior; keep the current API behavior.
+      - linters:
+          - staticcheck
+        path: pkg/proxykit/backend.go
+        text: 'SA1019: \(net/http/httputil.ReverseProxy\).Director'
+      - linters:
+          - dupl
+          - errcheck
+          - gocyclo
+          - gosec
+        path: (.+)_test\.go
+      - linters:
+          - staticcheck
+        path: pkg/golinters/gofumpt/gofumpt.go
+        text: 'SA1019: settings.LangVersion is deprecated: use the global `run.go` instead.'
+      - linters:
+          - staticcheck
+        path: pkg/golinters/internal/staticcheck_common.go
+        text: 'SA1019: settings.GoVersion is deprecated: use the global `run.go` instead.'
+      - linters:
+          - staticcheck
+        path: pkg/lint/lintersdb/manager.go
+        text: 'SA1019: (.+).(GoVersion|LangVersion) is deprecated: use the global `run.go` instead.'
+      - linters:
+          - gocritic
+        path: pkg/golinters/unused/unused.go
+        text: 'rangeValCopy: each iteration copies 160 bytes \(consider pointers or indexing\)'
+      - linters:
+          - gosec
+        path: pkg/goanalysis/runner_loadingpackage.go
+        text: 'G115: integer overflow conversion uintptr -> int'
+      - linters:
+          - gosec
+        path: test/bench/bench_test.go
+        text: 'G115: integer overflow conversion int -> int32'
+      - linters:
+          - gosec
+        path: test/bench/bench_test.go
+        text: 'G115: integer overflow conversion uint64 -> int'
+    paths:
+      - .*_test\.go$
+      - docs
+      - api
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - goimports
+  settings:
+    gofmt:
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+    goimports:
+      local-prefixes:
+        - github.com/go-dev-frame/sponge
+  exclusions:
+    generated: lax
+    paths:
+      - .*_test\.go$
+      - docs
+      - api
+      - third_party$
+      - builtin$
+      - examples$

@@ -51,7 +51,7 @@ func GetTableName(object interface{}) string {
 
 	typeof := reflect.TypeOf(object)
 	switch typeof.Kind() {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		tableName = typeof.Elem().Name()
 	case reflect.Struct:
 		tableName = typeof.Name()

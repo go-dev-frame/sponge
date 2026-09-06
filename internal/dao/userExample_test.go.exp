@@ -60,10 +60,11 @@ func Test_userExampleDao_DeleteByID(t *testing.T) {
 	defer d.Close()
 	testData := d.TestData.(*model.UserExample)
 	expectedSQLForDeletion := "UPDATE .*"
+	expectedArgsForDeletionTime := d.AnyTime
 
 	d.SQLMock.ExpectBegin()
 	d.SQLMock.ExpectExec(expectedSQLForDeletion).
-		WithArgs(d.AnyTime, testData.ID).
+		WithArgs(expectedArgsForDeletionTime, testData.ID).
 		WillReturnResult(sqlmock.NewResult(int64(testData.ID), 1))
 	d.SQLMock.ExpectCommit()
 
@@ -199,14 +200,16 @@ func Test_userExampleDao_DeleteByIDs(t *testing.T) {
 	d := newUserExampleDao()
 	defer d.Close()
 	testData := d.TestData.(*model.UserExample)
+	expectedSQLForDeletion := "UPDATE .*"
+	expectedArgsForDeletionTime := d.AnyTime
 
 	d.SQLMock.ExpectBegin()
-	d.SQLMock.ExpectExec("UPDATE .*").
-		WithArgs(d.AnyTime, testData.ID).
+	d.SQLMock.ExpectExec(expectedSQLForDeletion).
+		WithArgs(expectedArgsForDeletionTime, testData.ID).
 		WillReturnResult(sqlmock.NewResult(int64(testData.ID), 1))
 	d.SQLMock.ExpectCommit()
 
-	err := d.IDao.(UserExampleDao).DeleteByID(d.Ctx, testData.ID)
+	err := d.IDao.(UserExampleDao).DeleteByIDs(d.Ctx, []uint64{testData.ID})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -226,7 +229,7 @@ func Test_userExampleDao_GetByCondition(t *testing.T) {
 		AddRow(testData.ID)
 
 	d.SQLMock.ExpectQuery("SELECT .*").
-		WithArgs(testData.ID).
+		WithArgs(testData.ID, 1).
 		WillReturnRows(rows)
 
 	_, err := d.IDao.(UserExampleDao).GetByCondition(d.Ctx, &query.Conditions{
@@ -334,10 +337,11 @@ func Test_userExampleDao_DeleteByTx(t *testing.T) {
 	defer d.Close()
 	testData := d.TestData.(*model.UserExample)
 	expectedSQLForDeletion := "UPDATE .*"
+	expectedArgsForDeletionTime := d.AnyTime
 
 	d.SQLMock.ExpectBegin()
 	d.SQLMock.ExpectExec(expectedSQLForDeletion).
-		WithArgs(d.AnyTime, testData.ID).
+		WithArgs(expectedArgsForDeletionTime, testData.ID).
 		WillReturnResult(sqlmock.NewResult(int64(testData.ID), 1))
 	d.SQLMock.ExpectCommit()
 

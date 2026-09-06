@@ -8,7 +8,7 @@ Tests sit beside Go sources as `*_test.go`. `test/auto-test/` holds generation c
 
 ## Build, Test, and Development Commands
 
-Run commands from the repository root. `go.mod` declares Go 1.23.0; CI uses 1.23.6.
+Run commands from the repository root. `go.mod` and CI use Go 1.27.1.
 
 - `go build -o /tmp/sponge ./cmd/sponge`: build the CLI for your machine.
 - `go run ./cmd/sponge run`: start the generation UI at `http://localhost:24631`.
@@ -16,7 +16,7 @@ Run commands from the repository root. `go.mod` declares Go 1.23.0; CI uses 1.23
 - `make build`: cross-compile the mixed HTTP/gRPC service template.
 - `make test`: run uncached short tests, excluding `api/`, `cmd/`, and vendor packages.
 - `make cover`: produce `cover.out` and open HTML coverage.
-- `make ci-lint`: format Go files in place, then run GolangCI-Lint. Use v1.64.8 to match CI.
+- `make ci-lint`: format Go files in place, then run GolangCI-Lint. Use v2.13.2 to match CI.
 
 ## Coding Style & Naming Conventions
 

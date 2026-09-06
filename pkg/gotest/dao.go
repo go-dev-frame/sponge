@@ -79,7 +79,7 @@ func (d *Dao) GetAnyArgs(obj interface{}) []driver.Value {
 	vo := reflect.ValueOf(obj)
 
 	//nolint
-	if to.Kind() == reflect.Ptr {
+	if to.Kind() == reflect.Pointer {
 		if vo.IsNil() {
 			panic("nil ptr")
 		}

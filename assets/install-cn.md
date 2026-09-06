@@ -1,4 +1,4 @@
-要求 [Go 1.23+](https://studygolang.com/dl) 版本。
+要求 [Go 1.27.1+](https://studygolang.com/dl) 版本。
 
 > **提示**：Go下载第三方包时可能会遇到依赖下载超时问题，建议设置国内代理：
 > ```bash
