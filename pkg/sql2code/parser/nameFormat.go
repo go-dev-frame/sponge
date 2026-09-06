@@ -95,7 +95,7 @@ func customToCamel(str string) string {
 func customToSnake(str string) string {
 	str = toCamel(str)
 	l := len(str)
-	for k, _ := range peculiarNouns {
+	for k := range peculiarNouns {
 		if str == k {
 			str = strings.ToLower(str)
 			break

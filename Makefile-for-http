@@ -10,6 +10,7 @@ PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/ | grep -v /api/ | grep
 # Check the code specification against the rules in the .golangci.yml file
 ci-lint:
 	@gofmt -s -w .
+	golangci-lint fmt --diff
 	golangci-lint run ./...
 
 

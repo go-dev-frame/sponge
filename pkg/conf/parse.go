@@ -18,7 +18,7 @@ import (
 // Parse configuration files to struct, including yaml, toml, json, etc., and turn on listening for configuration file changes if fs is not empty
 func Parse(configFile string, obj interface{}, reloads ...func()) error {
 	v := reflect.ValueOf(obj)
-	if v.Kind() != reflect.Ptr || v.IsNil() {
+	if v.Kind() != reflect.Pointer || v.IsNil() {
 		return fmt.Errorf("obj must be a non-nil pointer")
 	}
 

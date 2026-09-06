@@ -1,7 +1,7 @@
 # Need to package the code first `tar zcf serverNameExample.tar.gz $(ls)` and move it to the same directory as Dokerfile
 
 # Compile the go code, you can specify the golang version
-FROM golang:1.23-alpine as build
+FROM golang:1.27.1-alpine as build
 COPY . /go/src/serverNameExample
 WORKDIR /go/src/serverNameExample
 RUN tar zxf serverNameExample.tar.gz

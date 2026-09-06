@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/jinzhu/inflection"
@@ -368,7 +369,8 @@ func Test_getPostgresqlTableFields(t *testing.T) {
 }
 
 func TestGetSqliteTableInfo(t *testing.T) {
-	info, err := GetSqliteTableInfo("..\\..\\..\\test\\sql\\sqlite\\sponge.db", "user_order")
+	dbFile := filepath.Join("..", "..", "..", "test", "sql", "sqlite", "sponge.db")
+	info, err := GetSqliteTableInfo(dbFile, "user_order")
 	t.Log(err, info)
 }
 

@@ -286,10 +286,12 @@ func Test_userExampleHandler_DeleteByIDs(t *testing.T) {
 	h := newUserExampleHandler()
 	defer h.Close()
 	testData := h.TestData.(*model.UserExample)
+	expectedSQLForDeletion := "UPDATE .*"
+	expectedArgsForDeletionTime := h.MockDao.AnyTime
 
 	h.MockDao.SQLMock.ExpectBegin()
-	h.MockDao.SQLMock.ExpectExec("UPDATE .*").
-		WithArgs(h.MockDao.AnyTime, testData.ID). // adjusted for the amount of test data
+	h.MockDao.SQLMock.ExpectExec(expectedSQLForDeletion).
+		WithArgs(expectedArgsForDeletionTime, testData.ID). // adjusted for the amount of test data
 		WillReturnResult(sqlmock.NewResult(int64(testData.ID), 1))
 	h.MockDao.SQLMock.ExpectCommit()
 

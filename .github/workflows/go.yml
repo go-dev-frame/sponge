@@ -24,12 +24,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.6
+          go-version: '1.27.1'
 
       - name: Lint Go Code
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
           make ci-lint
 
 
@@ -45,10 +45,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.6
+          go-version: '1.27.1'
 
-      - name: Run Unit tests
-        run: make test
+      - name: Run all tests
+        run: go test -count=1 ./...
 
       - name: Run coverage
         run: go test -coverprofile=coverage.txt -covermode=atomic $(go list ./... | grep -v /vendor/ | grep -v /api/ | grep -v /cmd/)
@@ -73,7 +73,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.23.6
+          go-version: '1.27.1'
 
       - name: Build
         run: make build && make build-sponge

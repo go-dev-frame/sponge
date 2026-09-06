@@ -1,6 +1,6 @@
 # Need to package the code first `tar zcf serverNameExample.tar.gz $(ls)` and move it to the same directory as Dokerfile
 # rpc server source code, used to test rpc methods
-FROM golang:1.23-alpine
+FROM golang:1.27.1-alpine
 MAINTAINER zhufuyi "g.zhufuyi@gmail.com"
 
 # go test dependency packages
